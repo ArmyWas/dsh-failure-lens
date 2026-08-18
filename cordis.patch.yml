@@ -1,0 +1,12 @@
+# dsh-failure-lens profile bundle patch.
+#
+# Adds the dsh-failure-lens client plugin to the Web profile. Its empty node
+# half makes the package visible to the host loader; the visible feature is
+# entirely browser-side and lives in `lib/client.js`.
+#
+# A patch replaces the targeted row's whole `config`, so the row below owns its
+# id. The browser roster for this feature does not require any config override.
+
+- insert:
+    - id: dsh-failure-lens
+      name: 'dsh-failure-lens'
