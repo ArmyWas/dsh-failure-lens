@@ -3,6 +3,8 @@
 [![CI](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
+[Official DeepSeek Harness community discussion](https://github.com/deepseek-ai/deepseek-harness/discussions/3193)
+
 **English** · [简体中文说明见下文](#简体中文说明)
 
 A small, deterministic [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) **Web client plugin** (v0.1) that explains one high-confidence Windows sandbox failure the moment it appears in the conversation: `spawn EPERM` caused by a confined Node child process trying to use piped stdio.

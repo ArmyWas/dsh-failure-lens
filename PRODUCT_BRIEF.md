@@ -16,7 +16,7 @@ The plugin must add a separate Conversation Node immediately after the matching 
 - The result text contains six repeated `Error: spawn EPERM` stacks and ends with `[exit code: 1]`.
 - Crucially, the tool-result block has `isError: false`. Existing failure observers that only consume thrown tool errors do not see this case.
 - The full exported session stays out of the repository because session logs may contain private conversation context; the minimal fixture retains only the evidence needed by the classifier test.
-- Official boundary documentation lives in the [`dsh-sandbox-windows-acl`](https://github.com/deepseek-ai/deepseek-harness/tree/main/packages/sandbox/windows-acl) and [`dsh-tool-pwsh`](https://github.com/deepseek-ai/deepseek-harness/tree/main/packages/tool/pwsh) packages.
+- Official boundary documentation lives in the [`dsh-sandbox-windows-acl`](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/sandbox/sandbox-windows-acl) and [`dsh-tool-pwsh`](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/shell/tool-pwsh) packages.
 
 ## Community gap check (2026-08-19)
 
@@ -63,9 +63,9 @@ Use only documented APIs from the installed/current Harness packages:
 
 Relevant references:
 
-- [`docs/cookbook/adding-a-conversation-node.md`](https://github.com/deepseek-ai/deepseek-harness/blob/main/docs/cookbook/adding-a-conversation-node.md)
-- [`packages/client/ui-workflow-run/src/client`](https://github.com/deepseek-ai/deepseek-harness/tree/main/packages/client/ui-workflow-run/src/client)
-- [`packages/client/AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/main/packages/client/AGENTS.md)
+- [`docs/cookbook/adding-a-conversation-node.md`](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cookbook/adding-a-conversation-node.md)
+- [`packages/client/ui-workflow-run/src/client`](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-workflow-run/src/client)
+- [`packages/client/AGENTS.md`](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/client/AGENTS.md)
 
 ## Acceptance criteria
 
