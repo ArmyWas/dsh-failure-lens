@@ -1,0 +1,14 @@
+# Node artifact output, dependencies, and package metadata
+node_modules/
+lib/
+test-dist/
+.npm-cache/
+*.tgz
+
+# Logs and editor/OS noise
+*.log
+.DS_Store
+Thumbs.db
+
+# Local environment overrides (never commit machine-specific npm config)
+.npmrc.local
