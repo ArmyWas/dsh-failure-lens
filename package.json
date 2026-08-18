@@ -1,0 +1,116 @@
+{
+  "name": "dsh-failure-lens",
+  "version": "0.1.0",
+  "description": "Deterministic DeepSeek Harness Web client plugin that explains the Windows-sandbox `spawn EPERM` failure as a distinct Conversation Node.",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./invariant": {
+      "types": "./lib/types/invariant.d.ts",
+      "default": "./lib/invariant.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./classifier": {
+      "types": "./lib/types/classifier.d.ts",
+      "default": "./lib/classifier.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/invariant.js",
+    "lib/classifier.js",
+    "lib/client.js",
+    "lib/types/**/*.d.ts",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ],
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "clean": "node -e \"for (const p of ['lib']) require('node:fs').rmSync(p, { recursive: true, force: true })\"",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run build:lib && npm run build:client",
+    "build:lib": "tsc -p tsconfig.build.json && node scripts/build-lib.mjs",
+    "build:client": "node scripts/build-client.mjs",
+    "build:test": "node scripts/build-test.mjs",
+    "test": "node scripts/build-test.mjs && node --test test-dist/all.test.mjs",
+    "check": "npm run typecheck && npm test && npm run build && npm run pack:check",
+    "pack:check": "npm pack --dry-run",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "dsh-client",
+    "sandbox",
+    "windows",
+    "eperm"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArmyWas/dsh-failure-lens.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ArmyWas/dsh-failure-lens/issues"
+  },
+  "homepage": "https://github.com/ArmyWas/dsh-failure-lens#readme",
+  "author": "ArmyWas",
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-client-locale": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-session": "^0.1.0-rc.7"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-client-locale": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.7",
+    "@deepseek-ai/dsh-session": "^0.1.0-rc.7",
+    "@types/node": "^22.0.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.0",
+    "esbuild": "^0.25.0",
+    "lightningcss": "^1.29.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.6.0"
+  }
+}

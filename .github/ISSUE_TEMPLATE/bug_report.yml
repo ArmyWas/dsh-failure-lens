@@ -1,0 +1,60 @@
+name: Bug report
+description: Report a bug or a suspected false positive in dsh-failure-lens.
+title: 'bug: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. `dsh-failure-lens` is a read-only, deterministic Web client plugin.
+        A false-positive or wrong-explanation report is most useful with evidence.
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What happened
+      options:
+        - The warning row appeared when it should not have (false positive)
+        - A real `spawn EPERM` was NOT explained (false negative)
+        - The row layout or copy is wrong
+        - Build / install / typecheck failure
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Description
+      description: What you saw and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        For false positives/negatives, attach the exported session (`.jsonl`) or paste the
+        minimal tool-result text. Note whether the Windows sandbox was active and the mode.
+        Never paste secrets or credentials.
+    validations:
+      required: false
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Commands or steps, as concrete as possible.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Node version (`node --version`), and Harness version.
+    validations:
+      required: true

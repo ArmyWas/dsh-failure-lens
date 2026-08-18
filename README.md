@@ -1,5 +1,8 @@
 # dsh-failure-lens
 
+[![CI](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 **English** · [简体中文说明见下文](#简体中文说明)
 
 A small, deterministic [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) **Web client plugin** (v0.1) that explains one high-confidence Windows sandbox failure the moment it appears in the conversation: `spawn EPERM` caused by a confined Node child process trying to use piped stdio.
@@ -21,6 +24,11 @@ This signature comes from a real exported session: `tool/result`, sequence `2407
 
 ## What you see
 
+![dsh-failure-lens explaining a real spawn EPERM result inside DeepSeek Harness](docs/failure-lens-harness.jpg)
+
+The screenshot above is from the installed plugin reacting to a fresh, real
+`npm test` result inside the Harness Windows sandbox—not a mockup.
+
 After a matching tool result, a compact warning row appears using the official Harness visual language and design tokens (`StateDot`, row chrome, `--dsw-alias-*` tokens):
 
 | Chinese | English |
@@ -34,7 +42,8 @@ The row is **historical information**: it reads what already happened and never 
 
 ## Not a failure logger
 
-This plugin is deliberately narrow and is **not** `dsh-fail-logger`:
+This plugin is deliberately narrow and is **not**
+[`dsh-fail-logger`](https://github.com/Areium/dsh-fail-logger):
 
 - `dsh-fail-logger` records *thrown* failures into a long-term skill and explicitly does **not** trigger for non-zero shell exit codes. This observed event is `isError: false` and a non-zero exit code, so it falls outside that tool's contract.
 - `dsh-failure-lens` adds **no** record, writes **no** skill, and triggers **only** on the four-condition `spawn EPERM` signature. It is a read-only, presentational explanation of one known sandbox boundary.
@@ -43,7 +52,13 @@ This plugin is deliberately narrow and is **not** `dsh-fail-logger`:
 
 Requires Node `^22.19.0 || >=24.0.0` and a DeepSeek Harness Web profile.
 
-Install the dependency from this checkout:
+Install the prebuilt GitHub release (no clone or local build required):
+
+```sh
+dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.1.0/dsh-failure-lens-0.1.0.tgz
+```
+
+Or install a local checkout while developing:
 
 ```sh
 dsh plugin --profile web add link:<path-to-dsh-failure-lens>
@@ -62,12 +77,10 @@ dsh plugin --profile web remove dsh-failure-lens
 
 The same `dsh plugin` command removes the dependency and its bundle-list entry.
 
-To roll back to a prior composition without uninstalling, edit the profile's `cordis.patch.yml` (under `$DSH_HOME/profiles/web`) to disable the two rows:
+To roll back to a prior composition without uninstalling, edit the profile's `cordis.patch.yml` (under `$DSH_HOME/profiles/web`) to disable the plugin row:
 
 ```yaml
 - id: dsh-failure-lens
-  disabled: true
-- id: dsh-failure-lens-invariant
   disabled: true
 ```
 
@@ -108,6 +121,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 它与 `dsh-fail-logger` 的边界：后者只记录**被抛出的**失败，且不处理非零退出码；而本事件是 `isError: false` 的非零退出码，本插件只做只读、展示性的解释，不写入任何长期记忆。
 
-安装：运行 `dsh plugin --profile web add link:<路径>`；该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
+安装已构建版本：`dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.1.0/dsh-failure-lens-0.1.0.tgz`；本地开发可用 `dsh plugin --profile web add link:<路径>`。该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
 
 隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `conversationEvents.register` / `slots.inject` / `locale.register` 三个公开接口组合。
