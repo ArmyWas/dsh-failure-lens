@@ -55,7 +55,7 @@ Requires Node `^22.19.0 || >=24.0.0` and a DeepSeek Harness Web profile.
 Install the prebuilt GitHub release (no clone or local build required):
 
 ```sh
-dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.1.0/dsh-failure-lens-0.1.0.tgz
+dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.1.1/dsh-failure-lens-0.1.1.tgz
 ```
 
 Or install a local checkout while developing:
@@ -121,6 +121,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 它与 `dsh-fail-logger` 的边界：后者只记录**被抛出的**失败，且不处理非零退出码；而本事件是 `isError: false` 的非零退出码，本插件只做只读、展示性的解释，不写入任何长期记忆。
 
-安装已构建版本：`dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.1.0/dsh-failure-lens-0.1.0.tgz`；本地开发可用 `dsh plugin --profile web add link:<路径>`。该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
+安装已构建版本：`dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.1.1/dsh-failure-lens-0.1.1.tgz`；本地开发可用 `dsh plugin --profile web add link:<路径>`。该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
 
 隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `conversationEvents.register` / `slots.inject` / `locale.register` 三个公开接口组合。

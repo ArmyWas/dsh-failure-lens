@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-08-19
+
+### Changed
+
+- Treats Harness platform modules as host-provided build-time dependencies instead of profile peers, eliminating misleading missing-peer warnings during release-tarball installation.
+- Keeps React as an optional peer because the Harness Web platform supplies the runtime singleton.
+- Verifies the public release URL from a fresh isolated DSH home and confirms the bundle is added to the composed profile automatically.
+
 ## [0.1.0] - 2026-08-19
 
 ### Added
