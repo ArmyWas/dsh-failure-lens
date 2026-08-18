@@ -1,6 +1,6 @@
 {
   "name": "dsh-failure-lens",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Deterministic DeepSeek Harness Web client plugin that explains the Windows-sandbox `spawn EPERM` failure as a distinct Conversation Node.",
   "type": "module",
   "main": "lib/index.js",
@@ -85,17 +85,13 @@
   },
   "homepage": "https://github.com/ArmyWas/dsh-failure-lens#readme",
   "author": "ArmyWas",
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.2.0"
   },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-client-locale": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.7",
-    "@deepseek-ai/dsh-session": "^0.1.0-rc.7"
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
