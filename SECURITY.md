@@ -6,7 +6,7 @@
 
 **Report to:** open a private security advisory in the GitHub repository, or contact the maintainer directly. Please include the affected version and a minimal reproduction.
 
-## Security guarantees (v0.1)
+## Security guarantees (v0.2)
 
 The plugin is designed within the following hard boundaries. Any behavior outside them is a bug and should be reported:
 

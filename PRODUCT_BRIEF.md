@@ -10,11 +10,11 @@ The plugin must add a separate Conversation Node immediately after the matching 
 
 ## Real evidence
 
-- Installed-plugin screenshot: [`docs/failure-lens-harness.jpg`](docs/failure-lens-harness.jpg)
+- Installed v0.2 replay screenshot: [`docs/failure-lens-harness-v0.2.png`](docs/failure-lens-harness-v0.2.png)
 - Real-event-derived fixture: [`test/fixtures/real-tool-result.ts`](test/fixtures/real-tool-result.ts)
 - Matching event: `tool/result`, sequence `24071`
 - The result text contains six repeated `Error: spawn EPERM` stacks and ends with `[exit code: 1]`.
-- Crucially, the tool-result block has `isError: false`. Existing failure observers that only consume thrown tool errors do not see this case.
+- The tool-result block has `isError: false`. This motivates the observer gap but is not a classifier condition; `[exit code: 1]` is the fixture's durable failure evidence.
 - The full exported session stays out of the repository because session logs may contain private conversation context; the minimal fixture retains only the evidence needed by the classifier test.
 - Official boundary documentation lives in the [`dsh-sandbox-windows-acl`](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/sandbox/sandbox-windows-acl) and [`dsh-tool-pwsh`](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/shell/tool-pwsh) packages.
 
@@ -28,14 +28,15 @@ The plugin must add a separate Conversation Node immediately after the matching 
 
 When a normal Windows user sees every test file marked failed plus a long stack and exit code 1, the natural conclusion is “the project tests are broken.” In this known case, no test body started; the Harness sandbox blocked the test runner from spawning workers. The UI should distinguish those meanings immediately and preserve the evidence.
 
-## V0.1 experience
+## V0.2 experience
 
 After a matching tool result, show a compact warning row using the official Harness visual language and tokens:
 
 - Title: `Harness 沙箱限制` / `Harness sandbox limitation`
 - Plain-language meaning: `测试未启动；这不代表测试断言失败。`
 - Safe next action: `如需验证，请在用户批准后以沙箱外权限重试同一命令。`
-- Signature chip/text: `EPERM · spawn`
+- Signature chip/text: `EPERM · spawn · exit 1` when a non-zero exit is present
+- Screen-reader-only evidence: source, stack count, exit code (when present), and errno
 
 The row is historical information, keyboard/assistive-technology readable, and bilingual through the official locale service. Raw output remains in the built-in tool card immediately above it.
 
@@ -50,7 +51,9 @@ Match only when all of these are present in a `tool/result` text block:
 3. `syscall: 'spawn'` or `syscall: "spawn"`
 4. a Node child-process stack marker such as `node:internal/child_process`
 
-Treat whitespace, CRLF/LF, ANSI color escapes, repeated stacks, and either quote style deterministically. Do not match generic `EPERM`, a user-authored assistant message, a different syscall, or a successful text merely mentioning the phrase without the structured signature.
+The same `tool-result` block must also carry `isError: true` or a non-zero `[exit code: N]` marker. Never stitch the four markers across blocks and never borrow failure evidence from a sibling block.
+
+Treat whitespace, CRLF/LF, ANSI color escapes, repeated stacks, and either quote style deterministically. Do not match generic `EPERM`, a user-authored assistant message, a different syscall, or a successful text—even one containing a complete historical stack—without same-block failure evidence.
 
 ## Official extension path
 
@@ -71,13 +74,13 @@ Relevant references:
 
 - Clean npm package and real DSH bundle patch; installable with `dsh plugin --profile web add link:<path>`.
 - No host-side runtime behavior beyond the minimal Cordis plugin entry required for loading.
-- Pure classifier tests cover positive real-log-derived input and negative lookalikes.
+- Pure classifier tests cover positive real-log-derived input, same-block failure evidence, block isolation, and negative lookalikes.
 - Conversation definition tests cover stable identity, location, and replay.
 - Component tests cover Chinese and English copy, semantics, and no raw-output duplication.
 - Build produces `lib/index.js`, `lib/invariant.js`, and lazy-CJS `lib/client.js` expected by Harness.
 - Typecheck, unit tests, package dry-run, and a real install/boot smoke test pass.
 - Apache-2.0 license, bilingual README, security/privacy section, uninstall/rollback instructions, screenshots, changelog, CI, issue templates, and contribution guide.
-- Keep V0.1 deliberately narrow; a future classifier registry is allowed only after real demand.
+- Keep V0.2 deliberately narrow; a future classifier registry is allowed only after real demand.
 
 ## Stop conditions
 

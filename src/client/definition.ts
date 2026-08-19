@@ -25,6 +25,10 @@ export interface FailureLensChatData {
   readonly errno: string | undefined
   /** Number of distinct `Error: spawn EPERM` stacks in the tool result. */
   readonly stackCount: number
+  /** Durable failure evidence from the matching tool-result block. */
+  readonly failureEvidence: 'non-zero-exit' | 'tool-error'
+  /** Parsed non-zero process exit code, when present. */
+  readonly exitCode: number | undefined
 }
 
 declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
@@ -64,6 +68,8 @@ export const failureLensDefinition: ConversationNodeDefinition<FailureLensState>
       kind: diagnosis.kind,
       errno: diagnosis.errno,
       stackCount: diagnosis.stackCount,
+      failureEvidence: diagnosis.failureEvidence,
+      exitCode: diagnosis.exitCode,
     }
   },
   update: (context) => context.state,

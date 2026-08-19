@@ -1,7 +1,7 @@
 /**
  * Package-owned invariant companion for the dsh-failure-lens plugin.
  *
- * There is no runtime invariant to install for the V0.1 browser plugin: it
+ * There is no runtime invariant to install for the V0.2 browser plugin: it
  * contributes one Conversation Definition, one keyed renderer, and two locale
  * dictionaries, all effect-owned and proven by tests. The classifier is a pure
  * function with no shared runtime state. This companion exists so the Host's
@@ -18,7 +18,7 @@ export const name = 'dsh-failure-lens-invariant'
 /** Service required before the companion can reserve package ownership. */
 export const inject = ['invariants']
 
-/** No-op installer: the V0.1 surface raises no runtime invariant. */
+/** No-op installer: the V0.2 surface raises no runtime invariant. */
 const install = (): void => {}
 
 /** Register this package's invariant companion. */

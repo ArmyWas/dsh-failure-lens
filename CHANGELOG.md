@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-08-19
+
+### Changed
+
+- Requires durable failure evidence (`isError: true` or a non-zero `[exit code: N]`) in the same `tool-result` block as the four `spawn EPERM` markers.
+- Keeps tool-result blocks isolated so signatures and failure flags cannot be stitched together across unrelated results.
+- Shows a parsed non-zero exit code in the visible signature chip and exposes the evidence source, stack count, exit code, and errno to screen readers without duplicating raw output.
+- Documents the observed-session, public-source, and classifier evidence boundary, including that the fixture's `isError: false` is motivation rather than a matching condition.
+
+### Tests
+
+- Adds negative coverage for successful historical stacks, exit code zero, cross-block marker stitching, and borrowed tool-error flags.
+
 ## [0.1.1] - 2026-08-19
 
 ### Changed
