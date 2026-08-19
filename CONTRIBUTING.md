@@ -4,7 +4,7 @@ Thank you for considering contributing to `dsh-failure-lens`. This is a delibera
 
 ## Ground rules
 
-- **One signature.** V0.1 recognizes exactly the four-condition Windows `spawn EPERM` conjunction documented in the README. A future classifier registry is allowed only after real demand; do not add signature classes speculatively.
+- **One signature.** V0.2 recognizes exactly the four-condition Windows `spawn EPERM` conjunction plus same-block durable failure evidence documented in the README. A future classifier registry is allowed only after real demand; do not add signature classes speculatively.
 - **No side effects.** The plugin never calls a model, never approves anything, never writes the session log, never patches the DOM, and never copies raw long output.
 - **Official APIs only.** Compose through `conversationEvents.register`, `slots.inject('conversation.chat.node', …)`, and `locale.register`. Do not import private client internals or patch the DOM.
 - **Bilingual copy.** Every user-facing string must have a matching `zh` and `en` entry with the same key set (zh is the source of truth).
@@ -19,7 +19,7 @@ npm run build        # node half + client bundle
 npm run pack:check   # verify the published tarball contents
 ```
 
-The test suite includes a positive case derived from a real exported Harness session (`tool/result` seq `24071`) and negative lookalikes. Keep the classifier's behavior changes covered by new test cases.
+The test suite includes a positive case derived from a real exported Harness session (`tool/result` seq `24071`) and negative lookalikes, including successful historical output and cross-block evidence. Keep classifier behavior changes covered by new test cases.
 
 ## Pull requests
 

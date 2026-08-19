@@ -59,11 +59,23 @@ describe('failureLensDefinition — start state and view node', () => {
     const match = matchFor(realToolResultEvent)
     const ctx = emptyContext('24071')
     const state = failureLensDefinition.start(ctx as never, match as never, { previous: () => undefined } as never)
-    assert.deepEqual(state, { kind: 'windows-spawn-eperm', errno: '-4048', stackCount: 6 })
+    assert.deepEqual(state, {
+      kind: 'windows-spawn-eperm',
+      errno: '-4048',
+      stackCount: 6,
+      failureEvidence: 'non-zero-exit',
+      exitCode: 1,
+    })
   })
 
   it('update is a stable identity (returns current state)', () => {
-    const state = { kind: 'windows-spawn-eperm', errno: '-4048', stackCount: 6 } as const
+    const state = {
+      kind: 'windows-spawn-eperm',
+      errno: '-4048',
+      stackCount: 6,
+      failureEvidence: 'non-zero-exit',
+      exitCode: 1,
+    } as const
     const ctx = { ...emptyContext('24071'), state }
     const next = failureLensDefinition.update(ctx as never, matchFor(realToolResultEvent) as never)
     assert.equal(next, state)

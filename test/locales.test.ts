@@ -17,8 +17,16 @@ describe('failureLens locales', () => {
     assert.deepEqual(Object.keys(zh).sort(), Object.keys(en).sort())
   })
 
-  it('ships the four documented keys', () => {
-    assert.deepEqual(Object.keys(zh).sort(), ['action', 'meaning', 'signature', 'title'])
+  it('ships the seven documented keys', () => {
+    assert.deepEqual(Object.keys(zh).sort(), [
+      'action',
+      'evidenceExit',
+      'evidenceToolError',
+      'meaning',
+      'signature',
+      'signatureExit',
+      'title',
+    ])
   })
 
   it('keeps the required copy verbatim', () => {

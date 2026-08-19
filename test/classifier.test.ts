@@ -10,7 +10,11 @@ import { classifySpawnEperm } from '../src/classifier'
 import { realToolResultEvent } from './fixtures/real-tool-result'
 
 /** Wrap a body in a minimal tool/result-shaped event (unknown extra fields allowed). */
-function eventWith(text: string, overrides: Record<string, unknown> = {}): unknown {
+function eventWith(
+  text: string,
+  overrides: Record<string, unknown> = {},
+  isError: boolean | null = true,
+): unknown {
   return {
     type: 'tool/result',
     seq: 1,
@@ -23,7 +27,7 @@ function eventWith(text: string, overrides: Record<string, unknown> = {}): unkno
           type: 'tool-result',
           toolCallId: 'call_test',
           content: [{ type: 'text', text }],
-          isError: false,
+          ...(isError === null ? {} : { isError }),
         }],
       },
     },
@@ -41,6 +45,8 @@ describe('classifySpawnEperm — positive real-log-derived input', () => {
     assert.equal(result.kind, 'windows-spawn-eperm')
     assert.equal(result.errno, '-4048')
     assert.equal(result.stackCount, 6)
+    assert.equal(result.failureEvidence, 'non-zero-exit')
+    assert.equal(result.exitCode, 1)
   })
 
   it('counts repeated stacks even without an errno', () => {
@@ -48,6 +54,22 @@ describe('classifySpawnEperm — positive real-log-derived input', () => {
     const result = classifySpawnEperm(eventWith(body))
     assert.ok(result)
     assert.equal(result.stackCount, 2)
+  })
+
+  it('accepts an explicit tool error without an exit marker', () => {
+    const result = classifySpawnEperm(eventWith(SIG1))
+    assert.ok(result)
+    assert.equal(result.failureEvidence, 'tool-error')
+    assert.equal(result.exitCode, undefined)
+  })
+
+  it('accepts a non-zero exit when isError is false or absent', () => {
+    for (const isError of [false, null]) {
+      const result = classifySpawnEperm(eventWith(`${SIG1}[exit code: 7]`, {}, isError))
+      assert.ok(result)
+      assert.equal(result.failureEvidence, 'non-zero-exit')
+      assert.equal(result.exitCode, 7)
+    }
   })
 })
 
@@ -77,6 +99,58 @@ describe('classifySpawnEperm — encoding robustness', () => {
 })
 
 describe('classifySpawnEperm — negative lookalikes', () => {
+  it('rejects a complete historical stack without durable failure evidence', () => {
+    assert.equal(classifySpawnEperm(eventWith(SIG1, {}, false)), null)
+    assert.equal(classifySpawnEperm(eventWith(SIG1, {}, null)), null)
+    assert.equal(classifySpawnEperm(eventWith(`${SIG1}[exit code: 0]`, {}, false)), null)
+  })
+
+  it('does not stitch signature or failure evidence across tool-result blocks', () => {
+    const split = {
+      type: 'tool/result',
+      data: {
+        message: {
+          content: [
+            {
+              type: 'tool-result',
+              isError: false,
+              content: [{ type: 'text', text: "Error: spawn EPERM\ncode: 'EPERM'" }],
+            },
+            {
+              type: 'tool-result',
+              isError: true,
+              content: [{ type: 'text', text: "syscall: 'spawn'\nnode:internal/child_process\n[exit code: 1]" }],
+            },
+          ],
+        },
+      },
+    }
+    assert.equal(classifySpawnEperm(split), null)
+  })
+
+  it('does not borrow an error flag from another tool-result block', () => {
+    const mismatched = {
+      type: 'tool/result',
+      data: {
+        message: {
+          content: [
+            {
+              type: 'tool-result',
+              isError: false,
+              content: [{ type: 'text', text: SIG1 }],
+            },
+            {
+              type: 'tool-result',
+              isError: true,
+              content: [{ type: 'text', text: 'unrelated failure' }],
+            },
+          ],
+        },
+      },
+    }
+    assert.equal(classifySpawnEperm(mismatched), null)
+  })
+
   it('rejects generic EPERM without a spawn line', () => {
     const body = "errno: -4048,\ncode: 'EPERM',\nsyscall: 'spawn'\nnode:internal/child_process:1:1\n"
     assert.equal(classifySpawnEperm(eventWith(body)), null)

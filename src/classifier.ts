@@ -3,18 +3,21 @@
  *
  * This module is deliberately free of Harness imports: it accepts an unknown
  * Session-like event and returns either `null` (no match) or a renderer-safe
- * diagnosis object. It is the single source of truth for the V0.1 signature and
+ * diagnosis object. It is the single source of truth for the V0.2 signature and
  * is exercised directly by unit tests.
  *
- * The V0.1 signature is the four-condition conjunction from the product brief:
+ * The V0.2 signature requires the four-condition conjunction from the product brief:
  *   1. `Error: spawn EPERM`
  *   2. `code: 'EPERM'` or `code: "EPERM"`
  *   3. `syscall: 'spawn'` or `syscall: "spawn"`
  *   4. a Node child-process stack marker such as `node:internal/child_process`
  *
- * Whitespace, CRLF/LF line endings, ANSI color escapes, repeated stacks, and
- * either quote style are handled deterministically. Nothing here calls a model,
- * mutates a session log, approves anything, or copies raw long output.
+ * It also requires durable failure evidence from the same tool-result block:
+ * either `isError: true` or a non-zero `[exit code: N]` marker. This prevents a
+ * successful command that merely prints a complete historical stack from being
+ * mislabeled. Whitespace, CRLF/LF line endings, ANSI color escapes, repeated
+ * stacks, and either quote style are handled deterministically. Nothing here
+ * calls a model, mutates a session log, approves anything, or copies raw output.
  */
 
 /** Renderer-safe diagnosis produced for a positive match. */
@@ -25,6 +28,10 @@ export interface EpermDiagnosis {
   readonly errno: string | undefined
   /** Number of distinct `Error: spawn EPERM` stack occurrences in the text. */
   readonly stackCount: number
+  /** Durable evidence proving that the containing tool result failed. */
+  readonly failureEvidence: 'non-zero-exit' | 'tool-error'
+  /** Parsed non-zero process exit code, when the result text carries one. */
+  readonly exitCode: number | undefined
 }
 
 /**
@@ -32,9 +39,11 @@ export interface EpermDiagnosis {
  * tool-result body at all (wrong type or missing structure).
  */
 export interface ToolResultTextSource {
-  readonly type: string
+  readonly type: 'tool/result'
   /** Flat string body, or `null` when this event has no tool-result text. */
-  text: string | null
+  readonly text: string | null
+  /** Harness' tool-result flag; `undefined` when the producer omitted it. */
+  readonly isError: boolean | undefined
 }
 
 /** ANSI color / control-sequence escape, covering CSI and OSC forms. */
@@ -81,26 +90,44 @@ function readErrno(flat: string): string | undefined {
   return raw[0] === "'" || raw[0] === '"' ? raw.slice(1, -1) : raw
 }
 
+/** Read the first non-zero Harness shell-exit marker from normalized text. */
+function readNonZeroExitCode(flat: string): number | undefined {
+  const matches = flat.matchAll(/\[exit code:\s*(-?\d+)\]/gi)
+  for (const match of matches) {
+    const exitCode = Number(match[1])
+    if (Number.isSafeInteger(exitCode) && exitCode !== 0) return exitCode
+  }
+  return undefined
+}
+
 /**
- * Classify an unknown Session event against the V0.1 signature.
+ * Classify an unknown Session event against the V0.2 signature.
  *
  * @param event - unknown event carrying at least `type` and, for a tool result,
  *   a nested `text` string. Extra or unknown fields are ignored.
  * @returns the diagnosis for a positive match, otherwise `null`.
  */
 export function classifySpawnEperm(event: unknown): EpermDiagnosis | null {
-  const source = toolResultText(event)
-  if (source === null || source.text === null) return null
-  const flat = normalize(source.text)
-  if (!SPAWN_EPERM_LINE.test(flat)) return null
-  if (!CODE_EPERM.test(flat)) return null
-  if (!SYSCALL_SPAWN.test(flat)) return null
-  if (!CHILD_PROCESS_MARKER.test(flat)) return null
-  return {
-    kind: 'windows-spawn-eperm',
-    errno: readErrno(flat),
-    stackCount: countSpawnEperm(flat),
+  const sources = toolResultTexts(event)
+  if (sources === null) return null
+  for (const source of sources) {
+    if (source.text === null) continue
+    const flat = normalize(source.text)
+    if (!SPAWN_EPERM_LINE.test(flat)) continue
+    if (!CODE_EPERM.test(flat)) continue
+    if (!SYSCALL_SPAWN.test(flat)) continue
+    if (!CHILD_PROCESS_MARKER.test(flat)) continue
+    const exitCode = readNonZeroExitCode(flat)
+    if (exitCode === undefined && source.isError !== true) continue
+    return {
+      kind: 'windows-spawn-eperm',
+      errno: readErrno(flat),
+      stackCount: countSpawnEperm(flat),
+      failureEvidence: exitCode === undefined ? 'tool-error' : 'non-zero-exit',
+      exitCode,
+    }
   }
+  return null
 }
 
 /**
@@ -108,7 +135,7 @@ export function classifySpawnEperm(event: unknown): EpermDiagnosis | null {
  * durable `tool/result` event. Harness stores one `tool-result` block at the
  * message level; its model-facing text blocks live one level deeper.
  */
-function toolResultText(event: unknown): ToolResultTextSource | null {
+function toolResultTexts(event: unknown): ToolResultTextSource[] | null {
   if (typeof event !== 'object' || event === null) return null
   const candidate = event as { type?: unknown; data?: unknown }
   if (candidate.type !== 'tool/result' || candidate.data === null || typeof candidate.data !== 'object') {
@@ -119,19 +146,19 @@ function toolResultText(event: unknown): ToolResultTextSource | null {
   if (typeof message !== 'object' || message === null) return null
   const messageContent = (message as { content?: unknown }).content
   if (!Array.isArray(messageContent)) return null
-  const text = messageContent
-    .flatMap((part): unknown[] => {
-      if (typeof part !== 'object' || part === null) return []
-      const result = part as { type?: unknown; content?: unknown }
-      if (result.type !== 'tool-result' || !Array.isArray(result.content)) return []
-      return result.content
-    })
-    .map((part): string | null => {
-      if (typeof part !== 'object' || part === null) return null
-      const block = part as { type?: unknown; text?: unknown }
-      return block.type === 'text' && typeof block.text === 'string' ? block.text : null
-    })
-    .filter((value): value is string => value !== null)
-    .join('\n')
-  return { type: candidate.type, text }
+  return messageContent.flatMap((part): ToolResultTextSource[] => {
+    if (typeof part !== 'object' || part === null) return []
+    const result = part as { type?: unknown; content?: unknown; isError?: unknown }
+    if (result.type !== 'tool-result' || !Array.isArray(result.content)) return []
+    const text = result.content
+      .map((block): string | null => {
+        if (typeof block !== 'object' || block === null) return null
+        const content = block as { type?: unknown; text?: unknown }
+        return content.type === 'text' && typeof content.text === 'string' ? content.text : null
+      })
+      .filter((value): value is string => value !== null)
+      .join('\n')
+    const isError = typeof result.isError === 'boolean' ? result.isError : undefined
+    return [{ type: 'tool/result', text: text === '' ? null : text, isError }]
+  })
 }

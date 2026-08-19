@@ -24,7 +24,19 @@ export function FailureLensNode({ node, t }: FailureLensNodeProps) {
   const title = t('title')
   const meaning = t('meaning')
   const action = t('action')
-  const signature = t('signature')
+  const signature = data.exitCode === undefined
+    ? t('signature')
+    : t('signatureExit', { exitCode: data.exitCode })
+  const evidence = data.failureEvidence === 'non-zero-exit'
+    ? t('evidenceExit', {
+      stackCount: data.stackCount,
+      exitCode: data.exitCode,
+      errno: data.errno ?? 'unknown',
+    })
+    : t('evidenceToolError', {
+      stackCount: data.stackCount,
+      errno: data.errno ?? 'unknown',
+    })
   return (
     <section
       className={css.root}
@@ -43,6 +55,7 @@ export function FailureLensNode({ node, t }: FailureLensNodeProps) {
         </div>
         <p className={css.meaning}>{meaning}</p>
         <p className={css.action}>{action}</p>
+        <span className={css.srOnly}>{evidence}</span>
       </div>
     </section>
   )
