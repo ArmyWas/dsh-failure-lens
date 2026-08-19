@@ -1,0 +1,31 @@
+name: Upstream canary
+
+on:
+  schedule:
+    - cron: '31 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  next-client-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Overlay Harness next client packages
+        run: >-
+          npm install --no-save --package-lock=false
+          @deepseek-ai/dsh-client-locale@next
+          @deepseek-ai/dsh-client-runtime@next
+          @deepseek-ai/dsh-client-ui-conversation@next
+          @deepseek-ai/dsh-client-ui-primitives@next
+          @deepseek-ai/dsh-client-ui-slots@next
+          @deepseek-ai/dsh-session@next
+      - run: npm run check
