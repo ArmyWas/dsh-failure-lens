@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Replace requests for complete session exports with a structured,
+  privacy-trimmed false-positive and false-negative report.
+- Document the stable Harness target and the separate `next` compatibility
+  canary.
+- Restrict the main CI token to read-only repository contents.
+
+### Maintenance
+
+- Add weekly npm and GitHub Actions dependency updates.
+- Add a scheduled build-and-test canary against Harness `next` client packages.
+- Add repository pull-request and conduct templates.
+
 ## [0.2.0] - 2026-08-19
 
 ### Changed

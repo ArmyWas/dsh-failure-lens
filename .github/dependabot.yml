@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      harness-client:
+        patterns:
+          - '@deepseek-ai/*'
+      development-tooling:
+        dependency-type: development
+        exclude-patterns:
+          - '@deepseek-ai/*'
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
