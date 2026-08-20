@@ -7,12 +7,26 @@ updates:
       day: monday
     groups:
       harness-client:
+        applies-to: version-updates
         patterns:
           - '@deepseek-ai/*'
+        update-types:
+          - minor
+          - patch
       development-tooling:
+        applies-to: version-updates
         dependency-type: development
         exclude-patterns:
           - '@deepseek-ai/*'
+        update-types:
+          - minor
+          - patch
+    # Major upgrades need an explicit compatibility pass against the Harness
+    # client peer graph. Security updates are not affected by this rule.
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
   - package-ecosystem: github-actions
     directory: /
     schedule:
