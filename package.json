@@ -36,6 +36,8 @@
     "CONTRIBUTING.md",
     "SECURITY.md",
     "docs/BOUNDARY_EVIDENCE.md",
+    "docs/CAPABILITIES.md",
+    "docs/RELEASE_CRITERIA.md",
     "docs/RELEASE_NOTES_v0.2.0.md",
     "docs/failure-lens-harness-v0.2.png",
     "LICENSE"
@@ -55,13 +57,14 @@
   },
   "scripts": {
     "clean": "node -e \"for (const p of ['lib']) require('node:fs').rmSync(p, { recursive: true, force: true })\"",
+    "check:scripts": "node --check scripts/build-client.mjs && node --check scripts/build-lib.mjs && node --check scripts/build-test.mjs && node --check scripts/init-upstream-profile.mjs",
     "typecheck": "tsc --noEmit",
     "build": "npm run build:lib && npm run build:client",
     "build:lib": "tsc -p tsconfig.build.json && node scripts/build-lib.mjs",
     "build:client": "node scripts/build-client.mjs",
     "build:test": "node scripts/build-test.mjs",
     "test": "node scripts/build-test.mjs && node --test test-dist/all.test.mjs",
-    "check": "npm run typecheck && npm test && npm run build && npm run pack:check",
+    "check": "npm run check:scripts && npm run typecheck && npm test && npm run build && npm run pack:check",
     "pack:check": "npm pack --dry-run",
     "prepack": "npm run build"
   },
@@ -88,6 +91,10 @@
   },
   "homepage": "https://github.com/ArmyWas/dsh-failure-lens#readme",
   "author": "ArmyWas",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "peerDependencies": {
     "react": "^18.2.0"
   },
