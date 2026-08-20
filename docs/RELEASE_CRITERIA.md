@@ -8,6 +8,10 @@ classifier without evidence.
 
 - The exact GitHub release artifact passes typecheck, tests, build, pack, and a
   clean Harness install/boot smoke test.
+- The client bundle contains no absolute build-machine path, and its CSS Module
+  identities remain byte-for-byte stable when the checkout root changes.
+- The trusted release workflow uploads the same tarball it submits to npm, and
+  the GitHub asset digest matches the downloaded registry tarball.
 - `.github/workflows/publish.yml` is the package's npm trusted publisher; it
   uses GitHub OIDC rather than a long-lived registry token, and provenance is
   produced automatically.

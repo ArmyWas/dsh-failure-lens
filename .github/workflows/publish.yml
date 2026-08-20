@@ -5,7 +5,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -36,7 +36,32 @@ jobs:
       - name: Run release gates
         run: npm run check
 
-      - name: Publish with npm provenance
+      - name: Pack the exact release artifact
+        id: artifact
+        shell: bash
+        run: |
+          release_dir="$RUNNER_TEMP/dsh-failure-lens-release"
+          package_version="$(node -p "require('./package.json').version")"
+          tarball_name="dsh-failure-lens-${package_version}.tgz"
+          mkdir -p "$release_dir"
+          npm pack --pack-destination "$release_dir"
+          test -f "$release_dir/$tarball_name"
+          (cd "$release_dir" && sha256sum "$tarball_name" > "$tarball_name.sha256")
+          echo "tarball=$release_dir/$tarball_name" >> "$GITHUB_OUTPUT"
+          echo "checksum=$release_dir/$tarball_name.sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the exact npm input to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release upload "$GITHUB_REF_NAME"
+          "${{ steps.artifact.outputs.tarball }}"
+          "${{ steps.artifact.outputs.checksum }}"
+          --clobber
+
+      - name: Publish the exact artifact with npm provenance
         env:
           NPM_DIST_TAG: ${{ github.event.release.prerelease && 'next' || 'latest' }}
-        run: npm publish --access public --tag "$NPM_DIST_TAG"
+        run: >-
+          npm publish "${{ steps.artifact.outputs.tarball }}"
+          --access public --tag "$NPM_DIST_TAG"

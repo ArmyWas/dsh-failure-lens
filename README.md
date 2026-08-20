@@ -69,7 +69,7 @@ the last stable release.
 Install the stable package from npm (no clone or local build required):
 
 ```sh
-dsh plugin --profile web add dsh-failure-lens@0.2.1
+dsh plugin --profile web add dsh-failure-lens@0.2.2
 ```
 
 Version 0.2.1 and later are published from their matching public GitHub Releases
@@ -77,7 +77,7 @@ by an OIDC trusted-publishing workflow and carry npm provenance. To pin the
 transport as well as the version, use the equivalent release asset:
 
 ```sh
-dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.1/dsh-failure-lens-0.2.1.tgz
+dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.2/dsh-failure-lens-0.2.2.tgz
 ```
 
 Or install a local checkout while developing:
@@ -150,6 +150,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 它与 `dsh-fail-logger` 的边界：后者只记录**被抛出的**失败，且不处理非零退出码；而本事件是 `isError: false` 的非零退出码，本插件只做只读、展示性的解释，不写入任何长期记忆。
 
-安装稳定版：`dsh plugin --profile web add dsh-failure-lens@0.2.1`；也可使用完全固定的 GitHub Release 地址 `dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.1/dsh-failure-lens-0.2.1.tgz`。0.2.1 及后续 npm 版本由 GitHub OIDC 可信发布工作流从对应公开 Release 发布，并附带 provenance 来源证明。本地开发可用 `dsh plugin --profile web add link:<路径>`。安装命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
+安装稳定版：`dsh plugin --profile web add dsh-failure-lens@0.2.2`；也可使用完全固定的 GitHub Release 地址 `dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.2/dsh-failure-lens-0.2.2.tgz`。0.2.1 及后续 npm 版本由 GitHub OIDC 可信发布工作流从对应公开 Release 发布，并附带 provenance 来源证明。本地开发可用 `dsh plugin --profile web add link:<路径>`。安装命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
 
 隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `conversationEvents.register` / `slots.inject` / `locale.register` 三个公开接口组合。
