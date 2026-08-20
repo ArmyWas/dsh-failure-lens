@@ -66,16 +66,19 @@ canary rebuilds and tests the plugin against the Harness `next` client packages;
 a canary failure is an early upstream-compatibility signal, not a regression in
 the last stable release.
 
-Install the prebuilt GitHub release (no clone or local build required):
+Install the stable package from npm (no clone or local build required):
 
 ```sh
-dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.0/dsh-failure-lens-0.2.0.tgz
+dsh plugin --profile web add dsh-failure-lens@0.2.1
 ```
 
-The package metadata is ready for a public, provenance-bearing npm release, but
-the registry package does not exist yet. Keep using the pinned GitHub asset
-until an authenticated owner has published it and a clean registry install has
-been verified.
+Version 0.2.1 and later are published from their matching public GitHub Releases
+by an OIDC trusted-publishing workflow and carry npm provenance. To pin the
+transport as well as the version, use the equivalent release asset:
+
+```sh
+dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.1/dsh-failure-lens-0.2.1.tgz
+```
 
 Or install a local checkout while developing:
 
@@ -147,6 +150,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 它与 `dsh-fail-logger` 的边界：后者只记录**被抛出的**失败，且不处理非零退出码；而本事件是 `isError: false` 的非零退出码，本插件只做只读、展示性的解释，不写入任何长期记忆。
 
-安装已构建版本：`dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.0/dsh-failure-lens-0.2.0.tgz`；本地开发可用 `dsh plugin --profile web add link:<路径>`。该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。npm registry 包尚未真正发布，在公开查询与全新安装验证成功前，请继续使用固定 GitHub Release 地址。
+安装稳定版：`dsh plugin --profile web add dsh-failure-lens@0.2.1`；也可使用完全固定的 GitHub Release 地址 `dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.1/dsh-failure-lens-0.2.1.tgz`。0.2.1 及后续 npm 版本由 GitHub OIDC 可信发布工作流从对应公开 Release 发布，并附带 provenance 来源证明。本地开发可用 `dsh plugin --profile web add link:<路径>`。安装命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
 
 隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `conversationEvents.register` / `slots.inject` / `locale.register` 三个公开接口组合。

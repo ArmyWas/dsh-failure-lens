@@ -8,8 +8,9 @@ classifier without evidence.
 
 - The exact GitHub release artifact passes typecheck, tests, build, pack, and a
   clean Harness install/boot smoke test.
-- The npm owner is authenticated with two-factor authentication or a trusted
-  publisher, and provenance is produced.
+- `.github/workflows/publish.yml` is the package's npm trusted publisher; it
+  uses GitHub OIDC rather than a long-lived registry token, and provenance is
+  produced automatically.
 - A clean registry install is verified before README commands are changed.
 
 ## Classifier expansion gate

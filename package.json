@@ -1,6 +1,6 @@
 {
   "name": "dsh-failure-lens",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Deterministic DeepSeek Harness Web client plugin that explains the Windows-sandbox `spawn EPERM` failure as a distinct Conversation Node.",
   "type": "module",
   "main": "lib/index.js",
@@ -39,6 +39,7 @@
     "docs/CAPABILITIES.md",
     "docs/RELEASE_CRITERIA.md",
     "docs/RELEASE_NOTES_v0.2.0.md",
+    "docs/RELEASE_NOTES_v0.2.1.md",
     "docs/failure-lens-harness-v0.2.png",
     "LICENSE"
   ],
