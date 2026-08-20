@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-21
+
 ### Changed
 
 - Replace requests for complete session exports with a structured,
@@ -11,6 +13,10 @@ All notable changes to this project are documented in this file. The format foll
 - Document the stable Harness target and the separate `next` compatibility
   canary.
 - Restrict the main CI token to read-only repository contents.
+- Publish the package through npm's OIDC trusted-publishing path, with
+  automatically generated provenance and no long-lived registry token.
+- Add pinned npm and GitHub Release installation paths for the same reviewed
+  package version.
 
 ### Maintenance
 
