@@ -79,8 +79,13 @@ Relevant references:
 - Component tests cover Chinese and English copy, semantics, and no raw-output duplication.
 - Build produces `lib/index.js`, `lib/invariant.js`, and lazy-CJS `lib/client.js` expected by Harness.
 - Typecheck, unit tests, package dry-run, and a real install/boot smoke test pass.
+- A weekly canary compiles against Harness `next`, initializes the official
+  `next` Web profile contract, and validates the exact packed bundle surface.
 - Apache-2.0 license, bilingual README, security/privacy section, uninstall/rollback instructions, screenshots, changelog, CI, issue templates, and contribution guide.
 - Keep V0.2 deliberately narrow; a future classifier registry is allowed only after real demand.
+- Require three independent, privacy-reviewed field reports before broadening
+  the signature family; stars, clones, CI installs, and catalog entries do not
+  count as field evidence.
 
 ## Stop conditions
 

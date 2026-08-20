@@ -10,8 +10,13 @@ permissions:
 
 jobs:
   next-client-contract:
-    runs-on: ubuntu-latest
+    name: next client/profile / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -28,4 +33,27 @@ jobs:
           @deepseek-ai/dsh-client-ui-primitives@next
           @deepseek-ai/dsh-client-ui-slots@next
           @deepseek-ai/dsh-session@next
+          @deepseek-ai/dsh-app-boot@next
       - run: npm run check
+      - name: Initialize the official next profile and validate the packed bundle
+        shell: pwsh
+        run: |
+          $env:DSH_HOME = Join-Path $env:RUNNER_TEMP 'dsh-failure-lens-canary'
+          node scripts/init-upstream-profile.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'app-boot next could not initialize the web profile' }
+
+          $packRoot = Join-Path $env:RUNNER_TEMP 'dsh-failure-lens-pack'
+          New-Item -ItemType Directory -Force -Path $packRoot | Out-Null
+          $pack = npm pack --json --pack-destination $packRoot | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or -not $pack.filename) { throw 'npm pack did not produce an artifact' }
+
+          $paths = @($pack.files | ForEach-Object path)
+          foreach ($required in @('package.json', 'cordis.patch.yml', 'lib/index.js', 'lib/client.js')) {
+            if ($paths -notcontains $required) { throw "packed bundle is missing $required" }
+          }
+
+          $manifest = Get-Content -LiteralPath package.json -Raw | ConvertFrom-Json
+          if ($manifest.dsh.bundle.patch -ne './cordis.patch.yml') { throw 'unexpected dsh.bundle.patch contract' }
+          if ($manifest.dsh.client.platform -ne 'web') { throw 'unexpected dsh.client.platform contract' }
+
+          Write-Host "next profile initialized and packed bundle contract verified: $($pack.filename)"

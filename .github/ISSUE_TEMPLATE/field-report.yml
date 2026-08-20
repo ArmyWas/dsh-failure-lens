@@ -1,0 +1,67 @@
+name: Real Harness field report
+description: Share a privacy-trimmed real match, false positive, or false negative.
+title: '[Field report] '
+labels: [field-report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Independent field evidence determines whether this deliberately narrow classifier should change.
+
+        **Do not upload a complete session export, DSH_HOME, private command, source code, credential, or identifying local path.**
+  - type: input
+    id: versions
+    attributes:
+      label: Harness and Failure Lens versions
+      placeholder: '@deepseek-ai/dsh@0.1.0-rc.7; dsh-failure-lens@0.2.0'
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Observed outcome
+      options:
+        - Correct explanation
+        - False positive
+        - False negative
+        - Could not install or render
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Privacy-trimmed evidence shape
+      description: State only whether each marker, isError, and a non-zero exit code were present.
+      placeholder: |
+        Error: spawn EPERM: present
+        code EPERM: present
+        syscall spawn: present
+        node:internal/child_process: present
+        isError: false
+        exit code: 1
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What the plugin showed and what you expected
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I did not attach a complete session export or DSH_HOME.
+          required: true
+        - label: I removed credentials, private code and commands, arguments, identifying paths, and unrelated output.
+          required: true
+        - label: I understand that this is a public GitHub issue.
+          required: true

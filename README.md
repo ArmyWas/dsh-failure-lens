@@ -1,9 +1,11 @@
 # dsh-failure-lens
 
 [![CI](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/ci.yml)
+[![Upstream canary](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/upstream-canary.yml/badge.svg)](https://github.com/ArmyWas/dsh-failure-lens/actions/workflows/upstream-canary.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 [Official DeepSeek Harness community discussion](https://github.com/deepseek-ai/deepseek-harness/discussions/3193)
+· [Share a privacy-trimmed real field report](https://github.com/ArmyWas/dsh-failure-lens/issues/new?template=field-report.yml)
 
 **English** · [简体中文说明见下文](#简体中文说明)
 
@@ -70,6 +72,11 @@ Install the prebuilt GitHub release (no clone or local build required):
 dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.0/dsh-failure-lens-0.2.0.tgz
 ```
 
+The package metadata is ready for a public, provenance-bearing npm release, but
+the registry package does not exist yet. Keep using the pinned GitHub asset
+until an authenticated owner has published it and a clean registry install has
+been verified.
+
 Or install a local checkout while developing:
 
 ```sh
@@ -106,13 +113,18 @@ Rollback is immediate: the plugin owns no durable state, writes nothing to the s
 - **No raw-output duplication.** The tool result stays in the built-in tool card. The plugin copies neither the stack nor the long output; it shows only a summary line and, for screen readers, the evidence type, stack count, exit code (when present), and errno.
 - **No DOM patching.** The feature composes exclusively through the documented `conversationEvents.register`, `slots.inject('conversation.chat.node', …)`, and `locale.register` surfaces. There is no DOM injection and no import of private client internals.
 
+The auditable declared/observed surface is summarized in
+[Capability declaration](docs/CAPABILITIES.md). In particular, the literal
+`node:internal/child_process` is classifier evidence, not a subprocess import or
+execution call.
+
 ## False-positives
 
 The signature-plus-failure-evidence conjunction is deliberately conservative. A false positive is still possible if a non-sandboxed process fails with an identically-shaped Node `spawn EPERM` stack and a non-zero exit/tool-error flag. The row therefore says what this evidence is consistent with and preserves the raw result above it; please [file an issue](#contributing) with a privacy-trimmed event if you see a row you believe is wrong.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [Evidence boundary](docs/BOUNDARY_EVIDENCE.md). The test suite includes a positive case derived from a real exported Harness session and negative lookalikes (generic EPERM, different syscall, user-authored text, missing structure, successful historical output, cross-block evidence, ANSI/CRLF/repeated stacks). Run `npm test`, `npm run typecheck`, `npm run build`, and `npm run pack:check` before opening a PR.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [Evidence boundary](docs/BOUNDARY_EVIDENCE.md), and [release/adoption gates](docs/RELEASE_CRITERIA.md). The test suite includes a positive case derived from a real exported Harness session and negative lookalikes (generic EPERM, different syscall, user-authored text, missing structure, successful historical output, cross-block evidence, ANSI/CRLF/repeated stacks). Run `npm test`, `npm run typecheck`, `npm run build`, and `npm run pack:check` before opening a PR.
 
 ## License
 
@@ -135,6 +147,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 它与 `dsh-fail-logger` 的边界：后者只记录**被抛出的**失败，且不处理非零退出码；而本事件是 `isError: false` 的非零退出码，本插件只做只读、展示性的解释，不写入任何长期记忆。
 
-安装已构建版本：`dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.0/dsh-failure-lens-0.2.0.tgz`；本地开发可用 `dsh plugin --profile web add link:<路径>`。该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
+安装已构建版本：`dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.0/dsh-failure-lens-0.2.0.tgz`；本地开发可用 `dsh plugin --profile web add link:<路径>`。该命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。npm registry 包尚未真正发布，在公开查询与全新安装验证成功前，请继续使用固定 GitHub Release 地址。
 
 隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `conversationEvents.register` / `slots.inject` / `locale.register` 三个公开接口组合。
