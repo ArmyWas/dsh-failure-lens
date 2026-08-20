@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-08-21
+
+### Fixed
+
+- Derive CSS Module identities from a canonical repository-relative path so
+  class hashes are reproducible across Windows, Linux, and alternate checkout
+  roots.
+- Fail the client build if an absolute build-machine path leaks into the
+  shipped bundle.
+- Pack once in the trusted release workflow, then upload and publish that exact
+  tarball so the GitHub asset and npm registry input are byte-identical.
+
 ## [0.2.1] - 2026-08-21
 
 ### Changed

@@ -16,13 +16,14 @@
  * Externals must mirror the platform seed table (see `packages/client/web/src/platform.ts`).
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { readFileSync, realpathSync } from 'node:fs'
+import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { build } from 'esbuild'
 import { transform } from 'lightningcss'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const SOURCE_ROOT = realpathSync(ROOT)
 
 const PLUGIN_ID = 'dsh-failure-lens'
 
@@ -60,22 +61,33 @@ const VENDORED_LIBRARY = /^@deepseek-ai\/(cosmokit|schemastery)(\/|$)/
 /** Generated descriptor/codec contributions with no shared runtime identity. */
 const GENERATED_REMOTE = /^@deepseek-ai\/dsh-[a-z0-9]+(?:-[a-z0-9]+)*\/remote$/
 
-const CSS_VIRTUAL_PREFIX = '\0dsh-css:'
-const CSS_VIRTUAL_SUFFIX = '.mjs'
-
 /** CSS Modules: compile lightningcss, hand back the hashed class map + injector. */
 const cssModulesPlugin = {
   name: 'dsh-css-modules-inline',
   setup(builder) {
     builder.onResolve({ filter: /\.module\.css$/ }, (args) => {
-      const abs = resolve(dirname(args.importer), args.path)
-      return { path: CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX, namespace: 'dsh-css' }
+      const absolutePath = realpathSync(resolve(dirname(args.importer), args.path))
+      const logicalPath = relative(SOURCE_ROOT, absolutePath).replaceAll('\\', '/')
+      if (logicalPath === '..' || logicalPath.startsWith('../')) {
+        return { errors: [{ text: `CSS Module escapes the package root: ${args.path}` }] }
+      }
+      return {
+        path: logicalPath,
+        namespace: 'dsh-css',
+        pluginData: { absolutePath },
+      }
     })
     builder.onLoad({ filter: /.*/, namespace: 'dsh-css' }, (args) => {
-      const fileId = args.path.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length)
-      const source = readFileSync(fileId)
+      const absolutePath = args.pluginData?.absolutePath
+      if (typeof absolutePath !== 'string') {
+        return { errors: [{ text: `CSS Module ${args.path} is missing its source path` }] }
+      }
+      const source = readFileSync(absolutePath)
       const { code, exports: cssExports } = transform({
-        filename: fileId,
+        // lightningcss includes filename in [hash]. A repository-relative,
+        // slash-normalized identity keeps class names reproducible across OSes
+        // and prevents build-machine paths from leaking into the bundle.
+        filename: args.path,
         code: source,
         cssModules: { pattern: '[hash]_[local]' },
         minify: true,
@@ -84,7 +96,7 @@ const cssModulesPlugin = {
       for (const [local, exp] of Object.entries(cssExports ?? {}).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
         classMap[local] = exp.name
       }
-      const base = fileId.split(/[\\/]/).pop() ?? 'style.module.css'
+      const base = args.path.split('/').pop() ?? 'style.module.css'
       const tagId = `${PLUGIN_ID}/${base}`
       const js = [
         `const css = ${JSON.stringify(code.toString())};`,
@@ -98,7 +110,7 @@ const cssModulesPlugin = {
         `}`,
         `export default ${JSON.stringify(classMap)};`,
       ].join('\n')
-      return { contents: js, loader: 'js', resolveDir: dirname(fileId) }
+      return { contents: js, loader: 'js', resolveDir: dirname(absolutePath) }
     })
   },
 }
@@ -146,6 +158,18 @@ await build({
     js: 'return module.exports; } });',
   },
 })
+
+const clientOutput = readFileSync(resolve(ROOT, 'lib/client.js'), 'utf8')
+for (const buildRoot of new Set([
+  ROOT,
+  ROOT.replaceAll('\\', '/'),
+  SOURCE_ROOT,
+  SOURCE_ROOT.replaceAll('\\', '/'),
+])) {
+  if (clientOutput.includes(buildRoot)) {
+    throw new Error(`client bundle leaked the absolute build root: ${buildRoot}`)
+  }
+}
 
 // esbuild inlines all non-external deps by default when bundle:true and
 // external lists the platform table, matching tsdown's noExternal rule.
