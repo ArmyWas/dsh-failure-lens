@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Maintenance
+
+- Align the complete DeepSeek Harness client development graph on rc.8 after
+  cross-platform CI, the scheduled `next` canary, and a clean-profile install
+  validation.
+- Group future DeepSeek Harness prerelease dependency updates into one
+  compatibility review instead of independent lockfile pull requests.
+
 ## [0.2.2] - 2026-08-21
 
 ### Fixed

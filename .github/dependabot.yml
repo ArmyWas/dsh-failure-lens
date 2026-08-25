@@ -10,9 +10,9 @@ updates:
         applies-to: version-updates
         patterns:
           - '@deepseek-ai/*'
-        update-types:
-          - minor
-          - patch
+        # Keep the coupled Harness release train in one compatibility review.
+        # Dependabot classifies rc.N -> rc.N+1 as a prerelease update rather
+        # than `minor` or `patch`, so filtering update-types splits the group.
       development-tooling:
         applies-to: version-updates
         dependency-type: development

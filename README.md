@@ -60,7 +60,7 @@ This plugin is deliberately narrow and is **not**
 
 Requires Node `^22.19.0 || >=24.0.0` and a DeepSeek Harness Web profile.
 
-The stable compatibility target is `@deepseek-ai/dsh@0.1.0-rc.7`. Repository
+The stable compatibility target is `@deepseek-ai/dsh@0.1.0-rc.8`. Repository
 CI covers Node 22.19 and 24 on Windows, macOS, and Linux. A separate weekly
 canary rebuilds and tests the plugin against the Harness `next` client packages;
 a canary failure is an early upstream-compatibility signal, not a regression in
