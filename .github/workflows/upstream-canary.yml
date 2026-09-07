@@ -24,16 +24,30 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Record the resolved Harness next dependency train
+        shell: pwsh
+        run: |
+          $report = node scripts/report-upstream-next.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'could not resolve Harness next package metadata' }
+          $report | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
       - name: Overlay Harness next client packages
-        run: >-
-          npm install --no-save --package-lock=false
-          @deepseek-ai/dsh-client-locale@next
-          @deepseek-ai/dsh-client-runtime@next
-          @deepseek-ai/dsh-client-ui-conversation@next
-          @deepseek-ai/dsh-client-ui-primitives@next
-          @deepseek-ai/dsh-client-ui-slots@next
-          @deepseek-ai/dsh-session@next
-          @deepseek-ai/dsh-app-boot@next
+        shell: pwsh
+        run: |
+          $packages = @(
+            '@deepseek-ai/dsh-client-locale@next'
+            '@deepseek-ai/dsh-client-runtime@next'
+            '@deepseek-ai/dsh-client-ui-conversation@next'
+            '@deepseek-ai/dsh-client-ui-primitives@next'
+            '@deepseek-ai/dsh-client-ui-slots@next'
+            '@deepseek-ai/dsh-session@next'
+            '@deepseek-ai/dsh-app-boot@next'
+          )
+          npm install --ignore-scripts --no-audit --no-fund --no-save --package-lock=false @packages
+          $installExit = $LASTEXITCODE
+          if ($installExit -ne 0) {
+            Write-Host '::error title=Harness next dependency train is not installable::npm could not resolve the published @next package set. See the job summary for exact versions and peer constraints.'
+            exit $installExit
+          }
       - run: npm run check
       - name: Initialize the official next profile and validate the packed bundle
         shell: pwsh
