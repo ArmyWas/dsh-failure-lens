@@ -16,7 +16,7 @@ const patchReload = usesLegacyTemplate ? undefined : template?.patchReload
 
 assert.ok(
   Array.isArray(bundles),
-  'app-boot next must expose bundles for the web profile template',
+  'app-boot must expose bundles for the web profile template',
 )
 if (!usesLegacyTemplate) {
   assert.ok(

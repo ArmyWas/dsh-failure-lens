@@ -6,9 +6,8 @@
  * ends with `[exit code: 1]`, and — crucially — the tool-result block carries
  * `isError: false`, so thrown-error observers never see this case.
  */
-import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
-import type { CallId } from '@deepseek-ai/dsh-llm'
-import type { MessageId } from '@deepseek-ai/dsh-client-connection/client'
+import type { MessageId, ToolCallId } from '@deepseek-ai/dsh-llm'
+import type { SessionEvent, SessionSeq } from '@deepseek-ai/dsh-session/types'
 
 /** The six-frame stack body verbatim from the audit log (ANSI-free, LF). */
 export const REAL_EPERM_OUTPUT: string = [
@@ -87,19 +86,19 @@ export const REAL_EPERM_OUTPUT: string = [
 /** A `tool/result` event matching the observed seq 24071 shape (isError: false). */
 export const realToolResultEvent: SessionEvent<'tool/result'> = {
   type: 'tool/result',
-  seq: 24071,
+  seq: 24071 as SessionSeq,
   time: 1787064508406,
   data: {
     turn: 1,
     step: 12,
     message: {
-      source: { kind: 'tool', callId: 'call_00_cGXceFPAedz4gjuQAFoI4055' as CallId },
+      source: { kind: 'tool', callId: 'call_00_cGXceFPAedz4gjuQAFoI4055' as ToolCallId },
       role: 'user',
       id: '5021e21c-d87b-49bf-a919-87b58cf559df' as MessageId,
       content: [
         {
           type: 'tool-result',
-          toolCallId: 'call_00_cGXceFPAedz4gjuQAFoI4055' as CallId,
+          toolCallId: 'call_00_cGXceFPAedz4gjuQAFoI4055' as ToolCallId,
           content: [{ type: 'text', text: REAL_EPERM_OUTPUT }],
           isError: false,
         },
@@ -107,5 +106,5 @@ export const realToolResultEvent: SessionEvent<'tool/result'> = {
     },
   },
   surfaceOp: 'append',
-  sourceEventSeqs: [24070],
+  sourceEventSeqs: [24070 as SessionSeq],
 }

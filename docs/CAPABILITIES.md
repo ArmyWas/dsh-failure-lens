@@ -8,8 +8,9 @@ that a static scanner might infer from diagnostic string literals.
 - `dsh.bundle.patch` points to `cordis.patch.yml`, which inserts one named
   browser plugin row. It does not monkey-patch Harness source or private APIs.
 - `dsh.client.platform` is `web`.
-- The browser bundle injects the documented locale, conversation runtime, and
-  conversation UI services needed to register one Conversation Node.
+- The browser bundle injects the documented locale, chat, conversation, and
+  renderer client packages needed to register one Conversation Node. It does
+  not depend on the removed `@deepseek-ai/dsh-client-runtime` package.
 
 ## Runtime behavior
 

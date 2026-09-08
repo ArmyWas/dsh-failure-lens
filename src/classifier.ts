@@ -3,10 +3,10 @@
  *
  * This module is deliberately free of Harness imports: it accepts an unknown
  * Session-like event and returns either `null` (no match) or a renderer-safe
- * diagnosis object. It is the single source of truth for the V0.2 signature and
+ * diagnosis object. It is the single source of truth for the stable signature and
  * is exercised directly by unit tests.
  *
- * The V0.2 signature requires the four-condition conjunction from the product brief:
+ * The signature requires the four-condition conjunction from the product brief:
  *   1. `Error: spawn EPERM`
  *   2. `code: 'EPERM'` or `code: "EPERM"`
  *   3. `syscall: 'spawn'` or `syscall: "spawn"`
@@ -101,7 +101,7 @@ function readNonZeroExitCode(flat: string): number | undefined {
 }
 
 /**
- * Classify an unknown Session event against the V0.2 signature.
+ * Classify an unknown Session event against the stable signature.
  *
  * @param event - unknown event carrying at least `type` and, for a tool result,
  *   a nested `text` string. Extra or unknown fields are ignored.

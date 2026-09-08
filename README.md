@@ -9,7 +9,7 @@
 
 **English** · [简体中文说明见下文](#简体中文说明)
 
-A small, deterministic [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) **Web client plugin** (v0.2) that explains one high-confidence Windows sandbox failure the moment it appears in the conversation: `spawn EPERM` caused by a confined Node child process trying to use piped stdio.
+A small, deterministic [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) **Web client plugin** (v0.3) that explains one high-confidence Windows sandbox failure the moment it appears in the conversation: `spawn EPERM` caused by a confined Node child process trying to use piped stdio.
 
 It adds a single **Conversation Node** immediately after the matching tool result — a compact, bilingual, keyboard/assistive-technology-readable warning row. It never replaces the built-in tool row, never patches the DOM, never alters the session log, never runs another model, never auto-approves anything, and never hides raw output.
 
@@ -35,7 +35,9 @@ This signature comes from a real exported session: `tool/result`, sequence `2407
 The screenshot above is the installed v0.2 plugin replaying a durable, real
 `npm test` event inside Harness—not a mockup. The raw event was produced by the
 v0.1.0 workspace test; v0.2 reclassifies that unchanged session evidence after
-a clean service restart and adds the parsed `exit 1` chip.
+a clean service restart and adds the parsed `exit 1` chip. Version 0.3 preserves
+this UI and classifier while migrating the client integration to Harness's
+current post-Runtime service graph.
 
 After a matching tool result, a compact warning row appears using the official Harness visual language and design tokens (`StateDot`, row chrome, `--dsw-alias-*` tokens):
 
@@ -60,16 +62,20 @@ This plugin is deliberately narrow and is **not**
 
 Requires Node `^22.19.0 || >=24.0.0` and a DeepSeek Harness Web profile.
 
-The stable compatibility target is `@deepseek-ai/dsh@0.1.0-rc.8`. Repository
-CI covers Node 22.19 and 24 on Windows, macOS, and Linux. A separate weekly
-canary rebuilds and tests the plugin against the Harness `next` client packages;
-a canary failure is an early upstream-compatibility signal, not a regression in
-the last stable release.
+Version 0.3 targets the current client architecture in
+`@deepseek-ai/dsh@0.1.2-rc.1`. Repository CI covers Node 22.19 and 24 on
+Windows, macOS, and Linux. A weekly compatibility canary resolves one coherent
+release manifest from `@deepseek-ai/dsh@next` and pins every active client
+package to that exact version. A separate registry-hygiene sentinel tracks the
+orphaned `@deepseek-ai/dsh-client-runtime@next` tag; its result does not define
+whether this plugin builds against the active client graph. The distinction and
+registry evidence are tracked in the
+[upstream release-consistency discussion](https://github.com/deepseek-ai/deepseek-harness/discussions/2763).
 
 Install the stable package from npm (no clone or local build required):
 
 ```sh
-dsh plugin --profile web add dsh-failure-lens@0.2.2
+dsh plugin --profile web add dsh-failure-lens@0.3.0
 ```
 
 Version 0.2.1 and later are published from their matching public GitHub Releases
@@ -77,7 +83,7 @@ by an OIDC trusted-publishing workflow and carry npm provenance. To pin the
 transport as well as the version, use the equivalent release asset:
 
 ```sh
-dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.2/dsh-failure-lens-0.2.2.tgz
+dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.3.0/dsh-failure-lens-0.3.0.tgz
 ```
 
 Or install a local checkout while developing:
@@ -90,6 +96,10 @@ The package declares its shipped `cordis.patch.yml` through `dsh.bundle.patch`.
 The `dsh plugin` command installs the dependency and appends the bundle to the
 profile's ordered `dsh.profile.bundles` list. Restart the Web profile and
 refresh the browser.
+
+Harness `0.1.0-rc.8` installations use the former client Runtime architecture;
+pin `dsh-failure-lens@0.2.2` for those profiles. Do not mix the 0.2 and 0.3
+client generations in one profile.
 
 ## Uninstall / rollback
 
@@ -114,7 +124,7 @@ Rollback is immediate: the plugin owns no durable state, writes nothing to the s
 - **No model calls.** Classification is a pure deterministic function; the plugin never invokes an LLM, never changes the system prompt, and never adds tokens to the request.
 - **No approval.** The plugin never auto-approves, never widens sandbox permissions, and never re-runs anything. Its "next action" line is advice text only.
 - **No raw-output duplication.** The tool result stays in the built-in tool card. The plugin copies neither the stack nor the long output; it shows only a summary line and, for screen readers, the evidence type, stack count, exit code (when present), and errno.
-- **No DOM patching.** The feature composes exclusively through the documented `conversationEvents.register`, `slots.inject('conversation.chat.node', …)`, and `locale.register` surfaces. There is no DOM injection and no import of private client internals.
+- **No DOM patching.** The feature composes exclusively through the documented `uiConversation.events.register`, `slots.inject('conversation.chat.node', …)`, and `locale.register` surfaces. There is no DOM injection and no import of private client internals.
 
 The auditable declared/observed surface is summarized in
 [Capability declaration](docs/CAPABILITIES.md). In particular, the literal
@@ -137,7 +147,7 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 ## 简体中文说明
 
-`dsh-failure-lens` 是一个**确定性的** DeepSeek Harness **网页客户端插件**（v0.2）。它只在同一个 `tool-result` 块中同时出现以下**四项签名证据**时才提示，并紧跟在匹配的工具结果之后插入一个独立的 Conversation Node（紧凑警告行，中英双语，支持键盘与屏幕阅读器）：
+`dsh-failure-lens` 是一个**确定性的** DeepSeek Harness **网页客户端插件**（v0.3）。它只在同一个 `tool-result` 块中同时出现以下**四项签名证据**时才提示，并紧跟在匹配的工具结果之后插入一个独立的 Conversation Node（紧凑警告行，中英双语，支持键盘与屏幕阅读器）：
 
 1. `Error: spawn EPERM`
 2. `code: 'EPERM'` 或 `code: "EPERM"`
@@ -150,6 +160,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 它与 `dsh-fail-logger` 的边界：后者只记录**被抛出的**失败，且不处理非零退出码；而本事件是 `isError: false` 的非零退出码，本插件只做只读、展示性的解释，不写入任何长期记忆。
 
-安装稳定版：`dsh plugin --profile web add dsh-failure-lens@0.2.2`；也可使用完全固定的 GitHub Release 地址 `dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.2.2/dsh-failure-lens-0.2.2.tgz`。0.2.1 及后续 npm 版本由 GitHub OIDC 可信发布工作流从对应公开 Release 发布，并附带 provenance 来源证明。本地开发可用 `dsh plugin --profile web add link:<路径>`。安装命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
+0.3 版面向现行的 `@deepseek-ai/dsh@0.1.2-rc.1` 客户端架构。安装：`dsh plugin --profile web add dsh-failure-lens@0.3.0`；也可使用完全固定的 GitHub Release 地址 `dsh plugin --profile web add https://github.com/ArmyWas/dsh-failure-lens/releases/download/v0.3.0/dsh-failure-lens-0.3.0.tgz`。旧的 Harness `0.1.0-rc.8` 仍应固定使用 `dsh-failure-lens@0.2.2`，不要在同一 profile 中混用两代客户端架构。0.2.1 及后续 npm 版本由 GitHub OIDC 可信发布工作流从对应公开 Release 发布，并附带 provenance 来源证明。本地开发可用 `dsh plugin --profile web add link:<路径>`。安装命令会安装依赖，并把 bundle 自动追加到 profile 的 `dsh.profile.bundles`，随后重启 Web profile。卸载：`dsh plugin --profile web remove dsh-failure-lens`，它会同步移除 bundle 条目。插件不产生任何持久状态。
 
-隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `conversationEvents.register` / `slots.inject` / `locale.register` 三个公开接口组合。
+隐私与安全：无遥测、无网络、无磁盘写入、无模型调用、无自动审批、无原始输出复制、无 DOM 补丁，全部通过官方 `uiConversation.events.register` / `slots.inject` / `locale.register` 三个公开接口组合。

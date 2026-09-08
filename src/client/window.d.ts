@@ -8,7 +8,7 @@
 export interface DshModuleRequest {
   /** Stable plugin id (the npm package name) stamped into the handoff. */
   readonly id: string
-  /** A platform-module require used for react and the ui-slots/runtime chains. */
+  /** A platform-module require used for React and the client UI service graph. */
   readonly factory: (require: (id: string) => unknown) => unknown
 }
 

@@ -1,0 +1,30 @@
+name: Registry hygiene sentinel
+
+on:
+  schedule:
+    - cron: '47 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  removed-runtime-tag:
+    name: removed Runtime npm tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Check the removed package's registry metadata
+        shell: pwsh
+        run: |
+          $report = node scripts/check-removed-runtime-tag.mjs 2>&1
+          $checkExit = $LASTEXITCODE
+          $report | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          if ($checkExit -ne 0) {
+            Write-Host '::error title=Removed Runtime is still advertised on npm::@deepseek-ai/dsh-client-runtime still has an undeclared @next version. The current Failure Lens client does not depend on it.'
+            exit $checkExit
+          }
