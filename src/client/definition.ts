@@ -8,12 +8,12 @@
  * function records the diagnosis into State for the keyed renderer.
  */
 
+import type { ChatConversationViewNode } from '@deepseek-ai/dsh-client-ui-chat/client'
 import type {
-  ChatConversationViewNode,
   ConversationLocation,
   ConversationNodeContext,
   ConversationNodeDefinition,
-} from '@deepseek-ai/dsh-client-runtime/client'
+} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
 import { classifySpawnEperm, type EpermDiagnosis } from '../classifier'
 
@@ -31,7 +31,7 @@ export interface FailureLensChatData {
   readonly exitCode: number | undefined
 }
 
-declare module '@deepseek-ai/dsh-client-ui-conversation/client' {
+declare module '@deepseek-ai/dsh-client-ui-chat/client' {
   interface ChatNodeDataMap {
     'failure-lens': FailureLensChatData
   }

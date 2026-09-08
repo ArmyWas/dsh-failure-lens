@@ -4,13 +4,27 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
-### Maintenance
+## [0.3.0] - 2026-09-08
 
-- Align the complete DeepSeek Harness client development graph on rc.8 after
-  cross-platform CI, the scheduled `next` canary, and a clean-profile install
-  validation.
-- Group future DeepSeek Harness prerelease dependency updates into one
-  compatibility review instead of independent lockfile pull requests.
+### Changed
+
+- Migrate from the removed `@deepseek-ai/dsh-client-runtime` package to the
+  current Harness client graph: Cordis `Context`,
+  `ctx.uiConversation.events.register(...)`, and the split chat/conversation
+  type surfaces in `@deepseek-ai/dsh@0.1.2-rc.1`.
+- Keep `0.2.2` documented as the compatibility line for the former
+  `@deepseek-ai/dsh@0.1.0-rc.8` Runtime architecture.
+- Replace the mixed per-package `@next` overlay with a compatibility canary
+  pinned to one exact release version selected by `@deepseek-ai/dsh@next`.
+- Split the orphaned `@deepseek-ai/dsh-client-runtime@next` registry signal
+  into an independent hygiene sentinel so it cannot be mistaken for a plugin
+  regression.
+
+### Tests
+
+- Add an entry-point contract test proving the plugin no longer requests the
+  removed `conversationEvents` service and registers through
+  `uiConversation`, slots, and locale.
 
 ## [0.2.2] - 2026-08-21
 

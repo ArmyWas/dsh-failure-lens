@@ -13,7 +13,7 @@ body:
     id: versions
     attributes:
       label: Harness and Failure Lens versions
-      placeholder: '@deepseek-ai/dsh@0.1.0-rc.8; dsh-failure-lens@0.2.2'
+      placeholder: '@deepseek-ai/dsh@0.1.2-rc.1; dsh-failure-lens@0.3.0'
     validations:
       required: true
   - type: dropdown

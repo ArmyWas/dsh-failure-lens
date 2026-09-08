@@ -4,7 +4,7 @@
 
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import type { ConversationNodeContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type { ConversationNodeContext } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { failureLensDefinition } from '../src/client/definition'
 import { realToolResultEvent } from './fixtures/real-tool-result'
 

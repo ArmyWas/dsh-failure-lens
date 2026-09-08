@@ -10,8 +10,8 @@
  *   - every other dependency is inlined
  *   - CSS Modules compile through lightningcss into a hashed class map whose
  *     stylesheet text self-injects a `<style data-plugin>` tag at factory time
- *   - react / react/jsx-runtime and the wire contracts stay external where they
- *     are platform modules; inline-safe wire layers are bundled
+ *   - react / react/jsx-runtime and the platform contracts stay external;
+ *     inline-safe wire layers are bundled
  *
  * Externals must mirror the platform seed table (see `packages/client/web/src/platform.ts`).
  */
@@ -41,13 +41,7 @@ const PLATFORM_MODULES = [
   '@deepseek-ai/dsh-client-schema-form',
 ]
 
-/**
- * Documented temporary exemption: the snapshot-store engine lives in runtime
- * pending rehoming. At runtime the lazy CJS table answers the require natively.
- */
-const RUNTIME_STORE_EXEMPTION = '@deepseek-ai/dsh-client-runtime/client'
-
-const CLIENT_EXTERNALS = [...PLATFORM_MODULES, RUNTIME_STORE_EXEMPTION]
+const CLIENT_EXTERNALS = [...PLATFORM_MODULES]
 
 /**
  * Wire/type layers that may be inlined: browser-safe contract surfaces with no

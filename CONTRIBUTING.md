@@ -4,9 +4,9 @@ Thank you for considering contributing to `dsh-failure-lens`. This is a delibera
 
 ## Ground rules
 
-- **One signature.** V0.2 recognizes exactly the four-condition Windows `spawn EPERM` conjunction plus same-block durable failure evidence documented in the README. A future classifier registry is allowed only after real demand; do not add signature classes speculatively.
+- **One signature.** V0.3 recognizes exactly the four-condition Windows `spawn EPERM` conjunction plus same-block durable failure evidence documented in the README. A future classifier registry is allowed only after real demand; do not add signature classes speculatively.
 - **No side effects.** The plugin never calls a model, never approves anything, never writes the session log, never patches the DOM, and never copies raw long output.
-- **Official APIs only.** Compose through `conversationEvents.register`, `slots.inject('conversation.chat.node', …)`, and `locale.register`. Do not import private client internals or patch the DOM.
+- **Official APIs only.** Compose through `uiConversation.events.register`, `slots.inject('conversation.chat.node', …)`, and `locale.register`. Do not import private client internals or patch the DOM.
 - **Bilingual copy.** Every user-facing string must have a matching `zh` and `en` entry with the same key set (zh is the source of truth).
 
 ## Development

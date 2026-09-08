@@ -28,7 +28,7 @@ The plugin must add a separate Conversation Node immediately after the matching 
 
 When a normal Windows user sees every test file marked failed plus a long stack and exit code 1, the natural conclusion is “the project tests are broken.” In this known case, no test body started; the Harness sandbox blocked the test runner from spawning workers. The UI should distinguish those meanings immediately and preserve the evidence.
 
-## V0.2 experience
+## V0.3 experience
 
 After a matching tool result, show a compact warning row using the official Harness visual language and tokens:
 
@@ -59,7 +59,7 @@ Treat whitespace, CRLF/LF, ANSI color escapes, repeated stacks, and either quote
 
 Use only documented APIs from the installed/current Harness packages:
 
-- register a single-event `ConversationNodeDefinition` through `ctx.conversationEvents.register(...)`
+- register a single-event `ConversationNodeDefinition` through `ctx.uiConversation.events.register(...)`
 - register its keyed renderer through `ctx.slots.inject('conversation.chat.node', ...)`
 - register `zh` and `en` dictionaries through `ctx.locale.register(...)`
 - package the browser half through `dsh.client` and an out-of-tree `lib/client.js` bundle
@@ -79,10 +79,13 @@ Relevant references:
 - Component tests cover Chinese and English copy, semantics, and no raw-output duplication.
 - Build produces `lib/index.js`, `lib/invariant.js`, and lazy-CJS `lib/client.js` expected by Harness.
 - Typecheck, unit tests, package dry-run, and a real install/boot smoke test pass.
-- A weekly canary compiles against Harness `next`, initializes the official
-  `next` Web profile contract, and validates the exact packed bundle surface.
+- A weekly compatibility canary pins the active client graph to the one exact
+  release selected by `@deepseek-ai/dsh@next`, initializes its official Web
+  profile contract, and validates the packed bundle surface.
+- A separate registry-hygiene sentinel reports whether the removed
+  `@deepseek-ai/dsh-client-runtime` package is still advertised by npm tags.
 - Apache-2.0 license, bilingual README, security/privacy section, uninstall/rollback instructions, screenshots, changelog, CI, issue templates, and contribution guide.
-- Keep V0.2 deliberately narrow; a future classifier registry is allowed only after real demand.
+- Keep V0.3 deliberately narrow; a future classifier registry is allowed only after real demand.
 - Require three independent, privacy-reviewed field reports before broadening
   the signature family; stars, clones, CI installs, and catalog entries do not
   count as field evidence.
