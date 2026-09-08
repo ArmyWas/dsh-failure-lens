@@ -68,8 +68,10 @@ Windows, macOS, and Linux. A weekly compatibility canary resolves one coherent
 release manifest from `@deepseek-ai/dsh@next` and pins every active client
 package to that exact version. A separate registry-hygiene sentinel tracks the
 orphaned `@deepseek-ai/dsh-client-runtime@next` tag; its result does not define
-whether this plugin builds against the active client graph. The distinction and
-registry evidence are tracked in the
+whether this plugin builds against the active client graph. A known unchanged
+gap is reported as a warning while one tracking issue records state changes, so
+the repository is not repeatedly marked red for the same external condition.
+The distinction and registry evidence are tracked in the
 [upstream release-consistency discussion](https://github.com/deepseek-ai/deepseek-harness/discussions/2763).
 
 Install the stable package from npm (no clone or local build required):

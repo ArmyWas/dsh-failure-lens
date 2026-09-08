@@ -61,7 +61,7 @@
   },
   "scripts": {
     "clean": "node -e \"for (const p of ['lib']) require('node:fs').rmSync(p, { recursive: true, force: true })\"",
-    "check:scripts": "node --check scripts/build-client.mjs && node --check scripts/build-lib.mjs && node --check scripts/build-test.mjs && node --check scripts/init-upstream-profile.mjs && node --check scripts/check-package-contract.mjs && node --check scripts/check-removed-runtime-tag.mjs && node --check scripts/smoke-web-profile.mjs",
+    "check:scripts": "node --check scripts/build-client.mjs && node --check scripts/build-lib.mjs && node --check scripts/build-test.mjs && node --check scripts/init-upstream-profile.mjs && node --check scripts/check-package-contract.mjs && node --check scripts/check-removed-runtime-tag.mjs && node scripts/check-removed-runtime-tag.mjs --self-test && node --check scripts/smoke-web-profile.mjs",
     "check:contract": "node scripts/check-package-contract.mjs",
     "typecheck": "tsc --noEmit",
     "build": "npm run build:lib && npm run build:client",

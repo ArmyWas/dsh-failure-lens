@@ -7,10 +7,11 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   removed-runtime-tag:
-    name: removed Runtime npm tag
+    name: removed Runtime npm metadata
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -18,13 +19,120 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - name: Check the removed package's registry metadata
+      - name: Observe the removed package's registry metadata
         shell: pwsh
         run: |
-          $report = node scripts/check-removed-runtime-tag.mjs 2>&1
+          $statePath = Join-Path $env:RUNNER_TEMP 'removed-runtime-registry-state.json'
+          $report = node scripts/check-removed-runtime-tag.mjs --json $statePath 2>&1
           $checkExit = $LASTEXITCODE
           $report | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           if ($checkExit -ne 0) {
-            Write-Host '::error title=Removed Runtime is still advertised on npm::@deepseek-ai/dsh-client-runtime still has an undeclared @next version. The current Failure Lens client does not depend on it.'
+            Write-Host '::error title=Registry sentinel could not complete::The npm query or state parser failed.'
             exit $checkExit
           }
+
+          $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
+          "REGISTRY_STATE_PATH=$statePath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          if ($state.status -eq 'unresolved') {
+            Write-Host "::warning title=Known upstream npm metadata gap::$($state.package) still advertises @next=$($state.next) without a deprecation message. Failure Lens does not depend on it."
+          }
+
+      - name: Notify only when the registry state changes
+        uses: actions/github-script@v9
+        env:
+          REGISTRY_STATE_PATH: ${{ env.REGISTRY_STATE_PATH }}
+        with:
+          script: |
+            const fs = require('node:fs')
+            const state = JSON.parse(fs.readFileSync(process.env.REGISTRY_STATE_PATH, 'utf8'))
+            const title = '[sentinel] Removed dsh-client-runtime npm metadata'
+            const marker = '<!-- dsh-failure-lens-registry-sentinel -->'
+            const fingerprintMarker = `<!-- registry-fingerprint:${state.fingerprint} -->`
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            const deprecation = state.deprecated ?? '_absent_'
+            const body = [
+              marker,
+              fingerprintMarker,
+              'The weekly registry sentinel is tracking npm metadata for a package removed from the current DeepSeek Harness source graph.',
+              '',
+              `- Package: \`${state.package}\``,
+              `- Status: **${state.status}** (${state.reason})`,
+              `- npm default version: \`${state.version ?? 'absent'}\``,
+              `- npm \`latest\`: \`${state.latest ?? 'absent'}\``,
+              `- npm \`next\`: \`${state.next ?? 'absent'}\``,
+              `- Deprecation: ${deprecation === '_absent_' ? deprecation : `\`${deprecation}\``}`,
+              '',
+              'This is an upstream registry-hygiene condition, not a Failure Lens compatibility failure. The active plugin does not depend on this package.',
+              '',
+              `Latest changed-state observation: [workflow run](${runUrl})`,
+              'Upstream context: https://github.com/deepseek-ai/deepseek-harness/discussions/2763',
+            ].join('\n')
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100,
+            })
+            const existing = issues.find(issue => !issue.pull_request && issue.title === title)
+            const previousFingerprint = existing?.body?.match(/<!-- registry-fingerprint:([a-f0-9]{64}) -->/)?.[1]
+
+            if (state.status === 'unresolved') {
+              if (!existing) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  body,
+                  assignees: [context.repo.owner],
+                })
+                core.notice('Created the single registry-state tracking issue.')
+                return
+              }
+
+              if (existing.state === 'open' && previousFingerprint === state.fingerprint) {
+                core.info('Known registry metadata is unchanged; no notification was sent.')
+                return
+              }
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                state: 'open',
+                body,
+                assignees: [context.repo.owner],
+              })
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `Registry metadata changed to \`${state.reason}\` (fingerprint \`${state.fingerprint}\`). See [the observation run](${runUrl}).`,
+              })
+              core.notice('Reopened or updated the tracking issue because registry metadata changed.')
+              return
+            }
+
+            if (existing?.state === 'open') {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              })
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `The registry-hygiene condition is now resolved via \`${state.reason}\`. See [the confirming run](${runUrl}).`,
+              })
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                state: 'closed',
+              })
+              core.notice('Closed the tracking issue because the upstream metadata is resolved.')
+            } else {
+              core.info('Registry metadata is resolved and no open tracking issue needs an update.')
+            }
