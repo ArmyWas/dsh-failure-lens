@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Changed
+
+- Treat the known orphaned Runtime npm metadata as a successful warning instead
+  of a recurring failed build. A single tracking issue is now created, updated,
+  reopened, or closed only when the registry fingerprint or resolution state
+  changes; registry-query and notification failures still fail the workflow.
+
 ## [0.3.0] - 2026-09-08
 
 ### Changed
