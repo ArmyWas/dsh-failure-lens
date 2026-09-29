@@ -39,7 +39,7 @@ describe('failureLensDefinition — identity and match', () => {
   })
 
   it('matches the current first-class tool message shape', () => {
-    const m = failureLensDefinition.match(currentToolResultEvent)
+    const m = failureLensDefinition.match(currentToolResultEvent as never)
     assert.deepEqual(m, { id: '24072', role: 'start' })
   })
 

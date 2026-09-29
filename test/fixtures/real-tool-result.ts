@@ -7,7 +7,7 @@
  * `isError: false`, so thrown-error observers never see this case.
  */
 import type { MessageId, ToolCallId } from '@deepseek-ai/dsh-llm'
-import type { SessionEvent, SessionSeq } from '@deepseek-ai/dsh-session/types'
+import type { SessionSeq } from '@deepseek-ai/dsh-session/types'
 
 /** The six-frame stack body verbatim from the audit log (ANSI-free, LF). */
 export const REAL_EPERM_OUTPUT: string = [
@@ -109,8 +109,8 @@ export const realToolResultEvent = {
   sourceEventSeqs: [24070 as SessionSeq],
 } as const
 
-/** The same result represented by the current v4 first-class tool message. */
-export const currentToolResultEvent: SessionEvent<'tool/result'> = {
+/** The same result represented structurally by the current v4 tool message. */
+export const currentToolResultEvent = {
   type: 'tool/result',
   seq: 24072 as SessionSeq,
   time: 1787064508407,
@@ -128,4 +128,4 @@ export const currentToolResultEvent: SessionEvent<'tool/result'> = {
   },
   surfaceOp: 'append',
   sourceEventSeqs: [24071 as SessionSeq],
-}
+} as const
