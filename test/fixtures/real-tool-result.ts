@@ -83,8 +83,8 @@ export const REAL_EPERM_OUTPUT: string = [
   '[exit code: 1]',
 ].join('\n')
 
-/** A `tool/result` event matching the observed seq 24071 shape (isError: false). */
-export const realToolResultEvent: SessionEvent<'tool/result'> = {
+/** A historical v3 `tool/result` event matching observed seq 24071 exactly. */
+export const realToolResultEvent = {
   type: 'tool/result',
   seq: 24071 as SessionSeq,
   time: 1787064508406,
@@ -107,4 +107,25 @@ export const realToolResultEvent: SessionEvent<'tool/result'> = {
   },
   surfaceOp: 'append',
   sourceEventSeqs: [24070 as SessionSeq],
+} as const
+
+/** The same result represented by the current v4 first-class tool message. */
+export const currentToolResultEvent: SessionEvent<'tool/result'> = {
+  type: 'tool/result',
+  seq: 24072 as SessionSeq,
+  time: 1787064508407,
+  data: {
+    turn: 1,
+    step: 12,
+    message: {
+      source: { kind: 'tool', callId: 'call_00_cGXceFPAedz4gjuQAFoI4055' as ToolCallId },
+      role: 'tool',
+      id: '5021e21c-d87b-49bf-a919-87b58cf559e0' as MessageId,
+      toolCallId: 'call_00_cGXceFPAedz4gjuQAFoI4055' as ToolCallId,
+      content: [{ type: 'text', text: REAL_EPERM_OUTPUT }],
+      isError: false,
+    },
+  },
+  surfaceOp: 'append',
+  sourceEventSeqs: [24071 as SessionSeq],
 }

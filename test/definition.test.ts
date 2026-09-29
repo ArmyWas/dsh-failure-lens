@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import type { ConversationNodeContext } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { failureLensDefinition } from '../src/client/definition'
-import { realToolResultEvent } from './fixtures/real-tool-result'
+import { currentToolResultEvent, realToolResultEvent } from './fixtures/real-tool-result'
 
 /** Minimal synthetic start match with an unresolved location. */
 function matchFor(event: unknown) {
@@ -36,6 +36,11 @@ describe('failureLensDefinition — identity and match', () => {
   it('uses the event seq as the Definition-local id and start role', () => {
     const m = failureLensDefinition.match(realToolResultEvent as never)
     assert.deepEqual(m, { id: '24071', role: 'start' })
+  })
+
+  it('matches the current first-class tool message shape', () => {
+    const m = failureLensDefinition.match(currentToolResultEvent)
+    assert.deepEqual(m, { id: '24072', role: 'start' })
   })
 
   it('does not match unrelated event types', () => {

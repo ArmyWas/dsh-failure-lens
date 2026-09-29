@@ -12,8 +12,10 @@
  *   3. `syscall: 'spawn'` or `syscall: "spawn"`
  *   4. a Node child-process stack marker such as `node:internal/child_process`
  *
- * It also requires durable failure evidence from the same tool-result block:
- * either `isError: true` or a non-zero `[exit code: N]` marker. This prevents a
+ * It also requires durable failure evidence from the same tool result: either
+ * `isError: true` or a non-zero `[exit code: N]` marker. Both the historical v3
+ * nested `tool-result` block and the current v4 first-class `tool` message are
+ * accepted without combining evidence across distinct results. This prevents a
  * successful command that merely prints a complete historical stack from being
  * mislabeled. Whitespace, CRLF/LF line endings, ANSI color escapes, repeated
  * stacks, and either quote style are handled deterministically. Nothing here
@@ -131,9 +133,11 @@ export function classifySpawnEperm(event: unknown): EpermDiagnosis | null {
 }
 
 /**
- * Extract flat text from the nested `ToolResultBlock.content` carried by a
- * durable `tool/result` event. Harness stores one `tool-result` block at the
- * message level; its model-facing text blocks live one level deeper.
+ * Extract flat text from a durable `tool/result` event. Harness v3 stored one or
+ * more nested `tool-result` blocks in a user-role message; v4 stores one result
+ * as a first-class tool-role message whose content blocks live directly on the
+ * message. A v4 message is accepted only when its tool source and call identity
+ * agree, so arbitrary direct text cannot impersonate a tool result.
  */
 function toolResultTexts(event: unknown): ToolResultTextSource[] | null {
   if (typeof event !== 'object' || event === null) return null
@@ -144,21 +148,55 @@ function toolResultTexts(event: unknown): ToolResultTextSource[] | null {
   const data = candidate.data as { message?: unknown }
   const message = data.message
   if (typeof message !== 'object' || message === null) return null
-  const messageContent = (message as { content?: unknown }).content
+  const current = message as {
+    role?: unknown
+    source?: unknown
+    toolCallId?: unknown
+    content?: unknown
+    isError?: unknown
+  }
+  if (current.role === 'tool') {
+    const source = current.source
+    if (typeof source !== 'object' || source === null) return []
+    const toolSource = source as { kind?: unknown; callId?: unknown }
+    if (
+      toolSource.kind !== 'tool'
+      || typeof toolSource.callId !== 'string'
+      || typeof current.toolCallId !== 'string'
+      || toolSource.callId !== current.toolCallId
+      || !Array.isArray(current.content)
+    ) {
+      return []
+    }
+    const text = textFromBlocks(current.content)
+    return [{
+      type: 'tool/result',
+      text,
+      isError: typeof current.isError === 'boolean' ? current.isError : undefined,
+    }]
+  }
+
+  const messageContent = current.content
   if (!Array.isArray(messageContent)) return null
   return messageContent.flatMap((part): ToolResultTextSource[] => {
     if (typeof part !== 'object' || part === null) return []
     const result = part as { type?: unknown; content?: unknown; isError?: unknown }
     if (result.type !== 'tool-result' || !Array.isArray(result.content)) return []
-    const text = result.content
-      .map((block): string | null => {
-        if (typeof block !== 'object' || block === null) return null
-        const content = block as { type?: unknown; text?: unknown }
-        return content.type === 'text' && typeof content.text === 'string' ? content.text : null
-      })
-      .filter((value): value is string => value !== null)
-      .join('\n')
+    const text = textFromBlocks(result.content)
     const isError = typeof result.isError === 'boolean' ? result.isError : undefined
-    return [{ type: 'tool/result', text: text === '' ? null : text, isError }]
+    return [{ type: 'tool/result', text, isError }]
   })
+}
+
+/** Join text blocks that belong to one tool result without crossing results. */
+function textFromBlocks(blocks: readonly unknown[]): string | null {
+  const text = blocks
+    .map((block): string | null => {
+      if (typeof block !== 'object' || block === null) return null
+      const content = block as { type?: unknown; text?: unknown }
+      return content.type === 'text' && typeof content.text === 'string' ? content.text : null
+    })
+    .filter((value): value is string => value !== null)
+    .join('\n')
+  return text === '' ? null : text
 }
