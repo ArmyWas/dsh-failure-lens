@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { classifySpawnEperm } from '../src/classifier'
-import { realToolResultEvent } from './fixtures/real-tool-result'
+import { currentToolResultEvent, realToolResultEvent } from './fixtures/real-tool-result'
 
 /** Wrap a body in a minimal tool/result-shaped event (unknown extra fields allowed). */
 function eventWith(
@@ -41,6 +41,16 @@ const SIG2 = 'Error: spawn EPERM\n    at X (node:internal/child_process:1:1)\n  
 describe('classifySpawnEperm — positive real-log-derived input', () => {
   it('matches the observed tool/result event seq 24071', () => {
     const result = classifySpawnEperm(realToolResultEvent)
+    assert.ok(result)
+    assert.equal(result.kind, 'windows-spawn-eperm')
+    assert.equal(result.errno, '-4048')
+    assert.equal(result.stackCount, 6)
+    assert.equal(result.failureEvidence, 'non-zero-exit')
+    assert.equal(result.exitCode, 1)
+  })
+
+  it('matches the same result in the current first-class tool message shape', () => {
+    const result = classifySpawnEperm(currentToolResultEvent)
     assert.ok(result)
     assert.equal(result.kind, 'windows-spawn-eperm')
     assert.equal(result.errno, '-4048')
@@ -149,6 +159,22 @@ describe('classifySpawnEperm — negative lookalikes', () => {
       },
     }
     assert.equal(classifySpawnEperm(mismatched), null)
+  })
+
+  it('rejects direct text unless it is a valid first-class tool message', () => {
+    const malformed = {
+      type: 'tool/result',
+      data: {
+        message: {
+          role: 'tool',
+          source: { kind: 'tool', callId: 'call_a' },
+          toolCallId: 'call_b',
+          isError: true,
+          content: [{ type: 'text', text: SIG1 }],
+        },
+      },
+    }
+    assert.equal(classifySpawnEperm(malformed), null)
   })
 
   it('rejects generic EPERM without a spawn line', () => {

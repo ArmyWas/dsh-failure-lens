@@ -13,20 +13,24 @@ const template = PROFILE_TEMPLATES.web
 const usesLegacyTemplate = Array.isArray(template)
 const bundles = usesLegacyTemplate ? template : template?.bundles
 const patchReload = usesLegacyTemplate ? undefined : template?.patchReload
+const hasPatchReload = !usesLegacyTemplate
+  && typeof template === 'object'
+  && template !== null
+  && Object.prototype.hasOwnProperty.call(template, 'patchReload')
 
 assert.ok(
   Array.isArray(bundles),
   'app-boot must expose bundles for the web profile template',
 )
-if (!usesLegacyTemplate) {
+if (hasPatchReload) {
   assert.ok(
     patchReload === 'live' || patchReload === 'startup',
-    'the object-form web profile template must expose a valid patchReload policy',
+    'an exposed patchReload policy must be live or startup',
   )
 }
 
 const profileDirectory = join(dshHome, 'profiles', 'web')
-if (usesLegacyTemplate) {
+if (patchReload === undefined) {
   initProfile(profileDirectory, bundles)
 } else {
   initProfile(profileDirectory, bundles, patchReload)
@@ -38,7 +42,13 @@ assert.deepEqual(
   bundles,
   'initialized manifest must preserve the official ordered bundle template',
 )
-if (!usesLegacyTemplate) {
+if (patchReload === undefined) {
+  assert.equal(
+    manifest.dsh?.profile?.patchReload,
+    undefined,
+    'initialized manifest must not invent a patchReload policy',
+  )
+} else {
   assert.equal(
     manifest.dsh?.profile?.patchReload,
     patchReload,

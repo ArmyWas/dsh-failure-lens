@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Fixed
+
+- Accept both the historical nested `tool-result` event and the current Harness
+  first-class `tool` message without combining evidence across separate tool
+  results, restoring the `next` compatibility canary after the v4 session-schema
+  migration.
+- Accept the current object-form Web profile template without assuming that
+  app-boot still exposes or writes the historical `patchReload` policy.
+
 ### Changed
 
 - Treat the known orphaned Runtime npm metadata as a successful warning instead
