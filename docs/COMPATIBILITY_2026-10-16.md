@@ -2,7 +2,9 @@
 
 PR #32 upgrades seven build-time Harness client/session packages from `0.1.2-rc.1` to `0.2.0-rc.2`. This report records actual Edge browser checks of a clean, isolated Harness `0.2.0-rc.2` Web profile on Windows, Node `24.14.1`.
 
-The tested plugin source is PR #32 commit `c9166ca7c7b5509030aaa5512a13c1131715ee8a`. The PR was subsequently synchronized with main's type-only #33 update. The first browser pass installed the local build through the official CLI; a second pass installed the actual `npm pack` tarball through that CLI. The tested tarball SHA-1 was `743dcb54a0a5a37fb9a9c92444e2ffc7b556188c` before this documentation update.
+The tested plugin source is PR #32 commit `c9166ca7c7b5509030aaa5512a13c1131715ee8a`. Dependabot subsequently rebased it onto main's type-only #33 update and refreshed the transitive Zod patch from 4.6.5 to 4.6.7. A clean reinstall and the full 43-test/check/build/pack suite passed again. The resulting `lib/client.js`, `lib/classifier.js`, and `lib/index.js` were byte-identical to the UI-tested build. The client bundle SHA-256 is `2e0fc67646372d6abeaaec1c3c94fcef3f2962a1b106d9bf561eaca98d8db82b`.
+
+The first browser pass installed the local build through the official CLI; a second pass installed the actual `npm pack` tarball through that CLI. The tested tarball SHA-1 was `743dcb54a0a5a37fb9a9c92444e2ffc7b556188c` before this documentation update. The upgraded dependency graph removes the old transitive KaTeX chain; `npm audit --omit=optional` reported zero advisories on the reviewed graph.
 
 ## Evidence and limits
 
