@@ -74,6 +74,11 @@ the repository is not repeatedly marked red for the same external condition.
 The distinction and registry evidence are tracked in the
 [upstream release-consistency discussion](https://github.com/deepseek-ai/deepseek-harness/discussions/2763).
 
+PR #32's client dependency upgrade was also verified in a clean Harness
+`0.2.0-rc.2` Web profile through actual Edge UI replay, bilingual rendering,
+negative cases, reload, uninstall, and packed reinstallation. See the
+[dated compatibility evidence](https://github.com/ArmyWas/dsh-failure-lens/blob/main/docs/COMPATIBILITY_2026-10-16.md).
+
 Install the stable package from npm (no clone or local build required):
 
 ```sh
